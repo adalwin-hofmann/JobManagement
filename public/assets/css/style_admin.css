@@ -1,0 +1,46 @@
+@import url(http://fonts.googleapis.com/css?family=Bitter:400,700,400italic);
+
+.top-buttons {
+	margin-bottom: 10px;
+}
+
+.header {
+	background: #009cff;
+	color: #FFF;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	margin-bottom: 20px;
+}
+
+.footer {
+	background: #4A4A4A;
+	color: #FFF;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	margin-top: 20px;
+}
+.map-container {
+	margin-bottom: 0px;
+}
+
+#mapdiv {
+	height: 300px;
+}
+
+.admin-logo-title {
+	color: white;
+	font-size: 20px;	
+}
+
+.top-menu a {
+	color: #FFF;
+}
+
+.page-header.navbar .top-menu .navbar-nav > li.dropdown .dropdown-toggle > i {
+	color: #FFF;
+}
+
+.label-color {
+    width: 50px;
+    height: 20px;
+}

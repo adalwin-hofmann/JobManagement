@@ -1,0 +1,331 @@
+@import url(http://fonts.googleapis.com/css?family=Droid+Sans:400,700);
+@import url(http://fonts.googleapis.com/css?family=Bitter:400,700,400italic&subset=latin,latin-ext);
+
+body {
+	font-family: 'Bitter', serif;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: 'Bitter', serif;
+	font-weight: 300;
+}
+
+.interview-header {
+    background: rgba(245,245,245,1);
+    background: -moz-linear-gradient(top, rgba(245,245,245,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(245,245,245,1)), color-stop(47%, rgba(232,232,232,1)), color-stop(100%, rgba(237,237,237,1)));
+    background: -webkit-linear-gradient(top, rgba(245,245,245,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    background: -o-linear-gradient(top, rgba(245,245,245,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    background: -ms-linear-gradient(top, rgba(245,245,245,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    background: linear-gradient(to bottom, rgba(245,245,245,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f5f5f5', endColorstr='#ededed', GradientType=0 );
+    padding: 15px;
+    border-radius: 5px !important;
+    position: relative;
+}
+
+.interview-body {
+    background: rgba(245,245,245,1);
+    background: -moz-linear-gradient(top, rgba(245,245,245,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(245,245,245,1)), color-stop(47%, rgba(232,232,232,1)), color-stop(100%, rgba(237,237,237,1)));
+    background: -webkit-linear-gradient(top, rgba(245,245,245,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    background: -o-linear-gradient(top, rgba(245,245,245,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    background: -ms-linear-gradient(top, rgba(245,245,245,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    background: linear-gradient(to bottom, rgba(245,245,245,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f5f5f5', endColorstr='#ededed', GradientType=0 );
+
+    height: 750px;
+    margin-top: 10px;
+    position: relative;
+    border-top-left-radius: 5px !important;
+    border-top-right-radius: 5px !important;
+    width: 100%;
+    display: inline-block;
+    overflow: hidden;
+}
+
+.interview-company-logo {
+    height: 45px;
+}
+
+.interview-company-image {
+    width: 100%;
+    height: 720px;
+    margin-top: 30px;
+}
+
+.interview-body-content {
+    position: absolute;
+    width: 100%;
+    top: 10px;
+    height: 740px;
+    overflow: hidden;
+}
+
+.interview-body-text {
+    color: white;
+    margin-top: 30px;
+}
+
+.interview-body-text label {
+    font-size: 25px;
+    margin-left: 10px;
+}
+
+.interview-step-box {
+    width: 100%;
+    height: 30px;
+    position: absolute;
+    bottom: 30px;
+}
+
+
+.step-div {
+    position: relative;
+    background: #EAEAEA;
+    border: 2px solid #4b575e;
+    float: left;
+    width: 25%;
+    text-align: center;
+    border-right: 0px;
+}
+
+.step-div:after, .step-div:before {
+    left: 100%;
+    top: 50%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.step-div:after {
+    border-color: rgba(136, 183, 213, 0);
+    border-left-color: #EAEAEA;
+    border-width: 14px;
+    margin-top: -14px;
+}
+.step-div:before {
+    border-color: rgba(75, 87, 94, 0);
+    border-left-color: #4b575e;
+    border-width: 17px;
+    margin-top: -17px;
+}
+.step-div-text {
+    margin-top: 6px;
+    color: black;
+}
+
+
+.step-div.active {
+    background: #0273bc;
+}
+
+.step-div.active .step-div-text {
+    color: white;
+}
+
+.step-div.active:after {
+    border-color: rgba(136, 183, 213, 0);
+    border-left-color: #0273bc;
+    border-width: 14px;
+    margin-top: -14px;
+}
+
+.interview-footer {
+    background: rgba(245,245,245,1);
+    background: -moz-linear-gradient(top, rgba(235,235,235,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(235,235,235,1)), color-stop(47%, rgba(232,232,232,1)), color-stop(100%, rgba(237,237,237,1)));
+    background: -webkit-linear-gradient(top, rgba(235,235,235,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    background: -o-linear-gradient(top, rgba(235,235,235,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    background: -ms-linear-gradient(top, rgba(235,235,235,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    background: linear-gradient(to bottom, rgba(235,235,235,1) 0%, rgba(232,232,232,1) 47%, rgba(237,237,237,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f5f5f5', endColorstr='#ededed', GradientType=0 );
+
+    width: 100%;
+    height: 102px;
+    padding-top: 25px;
+}
+
+.interview-continue-button {
+    background-color: #0273BC;
+    color: white;
+    border: 0px;
+    padding: 10px 20px;
+    font-size: 15px;
+}
+
+.img-interview-background {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    z-index: -1;
+}
+
+.interview-camera-test {
+    border: 1px solid rgb(15, 158, 238);
+    height: 240px;
+    max-width: 100%;
+    vertical-align: top;
+    width: 100%;
+    height: 720px;
+    background: #000000;
+}
+
+.interview-video-content {
+    width: 100%;
+    height: 720px;
+    margin-top: 10px;
+}
+
+.video-interview-preview {
+    border: 2px solid rgb(255, 0, 0);
+    height: 360px;
+    max-width: 100%;
+    vertical-align: top;
+    width: 480px;
+    background: #000000;
+}
+
+.interview-date-div {
+    width: 100%;
+    text-align: right;
+    height: 30px;
+    padding: 10px;
+    display: inline-block;
+}
+
+.interview-question-tab {
+    padding: 15px;
+    min-height: 200px;
+}
+
+
+.p-interview-question {
+    margin-top: 20px;
+    font-size: 20px;
+}
+
+
+.padding-0 {
+    padding: 0px !important;
+}
+
+.vi-modal-content {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    background: rgba(0,0,0,0.5);
+}
+.vi-modal-description {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: white;
+}
+
+.vi-modal-question {
+    text-align: center;
+    margin-top: 100px;
+    color: white;
+    font-size: 35px;
+}
+
+
+.modal-background {
+    background-size: 100%;
+    position: relative;
+    display: table;
+}
+
+.video-screen-container {
+    position: relative;
+}
+
+.stop-recording-button {
+    background-color: red;
+    border: 0px;
+    color: white;
+    padding: 9px 14px;
+}
+
+.video-record-stop-container {
+    position: absolute;
+    bottom: 50px;
+    text-align: center;
+    width: 442px;
+}
+
+.video-record-time-countdown-box {
+    position: absolute;
+    top: 0px;
+    background-color: white;
+    text-align: center;
+    left: 360px;
+    color: red;
+    padding-top: 13px;
+    padding-right: 10px;
+    padding-left: 10px;
+    padding-bottom: 9px;
+    width: 90px;
+}
+
+.video-record-time-countdown-box p {
+    font-size: 9px;
+    margin: 0px;
+}
+
+.video-record-time-countdown-box label {
+    font-size: 25px;
+    margin: 0px;
+}
+
+.vi-end-box {
+    position: absolute;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: table;
+    z-index: 1000000;
+}
+
+.vi-end-text-box {
+    display: table-cell;
+    width: 80%;
+    margin: auto;
+    height: 100px;
+    vertical-align: middle;
+    color: white;
+    text-align: center;
+    font-size: 30px;
+}
+
+#js-div-calendar {
+	max-width: 900px;
+	margin: 0 auto;
+	background: #FFF;
+	padding: 10px;
+}
+
+.background-face-interview {
+	position: fixed;
+	left: 0px;
+	right: 0px;
+	top: 0px;
+	bottom: 0px;
+	background: url(/assets/img/face_interview.jpg);
+	background-size: cover;
+	z-index: -1;
+}
+
+.background-calendar {
+	background: rgba(255, 255, 255, 0.5);
+}

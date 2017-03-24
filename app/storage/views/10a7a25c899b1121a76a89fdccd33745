@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="shortcut icon" href="/favicon.png">
+    <title>
+        <?php $__env->startSection('title'); ?>
+            <?php echo SITE_NAME; ?>
+
+        <?php echo $__env->yieldSection(); ?>
+    </title>
+    
+	<?php echo HTML::style('/assets/metronic/assets/global/plugins/font-awesome/css/font-awesome.min.css'); ?>
+
+	<?php echo HTML::style('/assets/metronic/assets/global/plugins/simple-line-icons/simple-line-icons.min.css'); ?>
+
+	<?php echo HTML::style('/assets/metronic/assets/global/plugins/bootstrap/css/bootstrap.min.css'); ?>
+
+	<?php echo HTML::style('/assets/metronic/assets/global/plugins/uniform/css/uniform.default.css'); ?>
+
+	<?php echo HTML::style('/assets/metronic/assets/global/plugins/bootstrap-switch/css/bootstrap-switch.min.css'); ?>
+
+	
+    <?php echo HTML::style('/assets/metronic/assets/global/css/components.css'); ?>
+
+    <?php echo HTML::style('/assets/metronic/assets/global/css/plugins.css'); ?>
+
+    
+    <?php echo HTML::style('/assets/css/style_bootstrap.css'); ?>
+
+    <?php echo HTML::style('/assets/css/style_common.css'); ?>
+
+
+    <?php echo $__env->yieldContent('styles'); ?>
+    <?php echo $__env->yieldContent('custom-styles'); ?>
+    
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+        
+</head>
+<body>    
+    <?php echo $__env->yieldContent('header'); ?>
+    
+    <?php echo $__env->yieldContent('body'); ?>
+    
+    <?php echo $__env->yieldContent('footer'); ?>
+</body>
+    <!-- BEGIN CORE PLUGINS -->
+    <!--[if lt IE 9]>
+    <?php echo HTML::script('/assets/metronic/global/plugins/respond.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/global/plugins/excanvas.min.js'); ?>
+
+    <![endif]-->
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/jquery-1.11.0.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/jquery-migrate-1.2.1.min.js'); ?>
+
+    
+    <!-- IMPORTANT! Load jquery-ui-1.10.3.custom.min.js before bootstrap.min.js to fix bootstrap tooltip conflict with jquery ui tooltip -->
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/jquery-ui/jquery-ui-1.10.3.custom.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/bootstrap/js/bootstrap.min.js'); ?>
+
+    
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/bootstrap-hover-dropdown/bootstrap-hover-dropdown.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/jquery.blockui.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/jquery.cokie.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/uniform/jquery.uniform.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/bootstrap-switch/js/bootstrap-switch.min.js'); ?>
+
+    
+    <?php echo HTML::script('/assets/js/alert.js'); ?>
+
+    <?php echo HTML::script('/assets/js/bootbox.js'); ?>
+
+    <?php echo $__env->yieldContent('header-scripts'); ?>
+    <?php echo $__env->yieldContent('scripts'); ?>
+    <?php echo $__env->yieldContent('custom-scripts'); ?>
+</html>

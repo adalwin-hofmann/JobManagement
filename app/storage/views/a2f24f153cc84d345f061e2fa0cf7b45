@@ -1,0 +1,27 @@
+<ul class="tabbable faq-tabbable margin-bottom-normal custom-left-menu">
+    <li class="<?php echo ($statusType == 0) ? 'active' : ''; ?>">
+        <a href="<?php echo URL::route('company.job.myjobs', 0); ?>">
+            <?php echo trans('company.all'); ?> &nbsp; <span style="float: right;">( <?php echo $company->jobs()->where('is_finished', 1)->where('by_company', 1)->count(); ?> )</span>
+        </a>
+    </li>
+    <li class="<?php echo ($statusType == 1) ? 'active' : ''; ?>">
+        <a href="<?php echo URL::route('company.job.myjobs', 1); ?>">
+            <?php echo trans('company.pending'); ?> &nbsp; <span style="float: right;">( <?php echo $company->jobs()->where('is_active', 1)->where('is_finished', 1)->where('by_company', 1)->where('status', 1)->count(); ?> )</span>
+        </a>
+    </li>
+    <li class="<?php echo ($statusType == 2) ? 'active' : ''; ?>">
+        <a href="<?php echo URL::route('company.job.myjobs', 2); ?>">
+            <?php echo trans('company.closed'); ?> &nbsp; <span style="float: right;">( <?php echo $company->jobs()->where('is_active', 1)->where('is_finished', 1)->where('by_company', 1)->where('status', 2)->count(); ?> )</span>
+        </a>
+    </li>
+    <li class="<?php echo ($statusType == 3) ? 'active' : ''; ?>">
+        <a href="<?php echo URL::route('company.job.myjobs', 3); ?>">
+            <?php echo trans('company.active'); ?> &nbsp; <span style="float: right;">( <?php echo $company->jobs()->where('is_active', 1)->where('is_finished', 1)->where('by_company', 1)->count(); ?> )</span>
+        </a>
+    </li>
+    <li class="<?php echo ($statusType == 4) ? 'active' : ''; ?>">
+        <a href="<?php echo URL::route('company.job.myjobs', 4); ?>">
+            <?php echo trans('company.shared'); ?> &nbsp; <span style="float: right;">( <?php echo $company->companyShares()->whereNotNull('job_id')->get()->count(); ?> )</span>
+        </a>
+    </li>
+</ul>

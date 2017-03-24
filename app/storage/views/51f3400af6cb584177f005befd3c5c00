@@ -1,0 +1,1032 @@
+<script src="http://maps.google.com/maps/api/js?v=3.exp&signed_in=true"></script>
+<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+
+<script>
+
+
+var selectedQuestions = [];
+var questionsCount = '<?php echo count($questions); ?>';
+var questionnaires = [];
+var questionnairesCount = '<?php echo count($questionnaires); ?>';
+var templates = [];
+var templatesCount = '<?php echo count($templates); ?>'
+
+questionsCount = questionsCount * 1;
+questionnairesCount = questionnairesCount * 1;
+templatesCount = templatesCount * 1;
+
+
+<?php
+	$i = 0;
+
+    foreach ($questionnaires as $questionnaire) {
+    	$questions = '';
+    	$questionIds = '';
+            foreach ($questionnaire->questions as $key => $value) {
+                $questions .= '<tr><td>'. ($key + 1) .'.</td><td>'. $value->questions->question .'</td></tr>';
+                if (strlen($questionIds) != 0) $questionIds .= ',';
+                $questionIds .= $value->questions_id;
+            }
+        ?>
+    	questionnaires['<?php echo $i++;?>'] = {
+    	    	id: '<?php echo $questionnaire->id; ?>',
+    	    	title: '<?php echo $questionnaire->title; ?>',
+    	    	questions : '<?php echo $questions; ?>',
+                questionIds : '<?php echo $questionIds; ?>'
+    	};
+
+<?php } ?>
+
+<?php
+    $i = 0;
+    foreach ($templates as $template) {
+        ?>
+
+        templates['<?php echo $i++;?>'] = {
+                id: '<?php echo $template->id; ?>',
+                title: '<?php echo $template->title; ?>',
+                description: '<?php echo str_replace('\n', '<br/>', substr(json_encode($template->description), 1, strlen(json_encode($template->description)) - 2)); ?>'
+        };
+
+        <?php
+    }
+?>
+
+
+
+
+var ProfileQuestionsTableEditable = function () {
+
+    var handleTable = function () {
+
+        function restoreRow(oTable, nRow) {
+            var aData = oTable.fnGetData(nRow);
+            var jqTds = $('>td', nRow);
+
+            for (var i = 0, iLen = jqTds.length; i < iLen; i++) {
+                oTable.fnUpdate(aData[i], nRow, i, false);
+            }
+
+            oTable.fnDraw();
+        }
+
+        function editRow(oTable, nRow) {
+            var aData = oTable.fnGetData(nRow);
+            var jqTds = $('>td', nRow);
+            jqTds[0].innerHTML = oTable.fnGetPosition(nRow) + 1;
+            jqTds[1].innerHTML = '<input type="text" class="form-control" value="' + aData[1] + '">';
+            jqTds[2].innerHTML = '<input type="text" class="form-control" value="' + aData[2] + '">';
+            jqTds[3].innerHTML = '<a class="edit" href="">Save</a>';
+            jqTds[4].innerHTML = '<a class="cancel" href="">Cancel</a>';
+        }
+
+        function saveRow(oTable, nRow) {
+            var jqInputs = $('input', nRow);
+
+            var companyId = '<?php echo $company->id; ?>';
+            var question = jqInputs[0].value;
+            var time = jqInputs[1].value;
+
+            $.ajax({
+                url: "<?php echo URL::route('company.profile.async.saveQuestion'); ?>",
+                dataType : "html",
+                type : "POST",
+                data : {company_id: companyId, question: question, time: time},
+                success : function(data) {
+                    $('div#select_questions_table_box').html(data);
+                    questionsCount ++;
+                    QuestionsTableManaged.init();
+                    selectedQuestions = [];
+                }
+            });
+
+            oTable.fnUpdate(oTable.fnGetPosition(nRow) + 1, nRow, 0, false);
+            oTable.fnUpdate(jqInputs[0].value, nRow, 1, false);
+            oTable.fnUpdate(jqInputs[1].value, nRow, 2, false);
+            oTable.fnUpdate('<a class="edit" href="">Edit</a>', nRow, 3, false);
+            oTable.fnUpdate('<a class="delete" href="">Delete</a>', nRow, 4, false);
+            oTable.fnDraw();
+        }
+
+        function cancelEditRow(oTable, nRow) {
+            var jqInputs = $('input', nRow);
+            oTable.fnUpdate(jqInputs[0].value, nRow, 0, false);
+            oTable.fnUpdate(jqInputs[1].value, nRow, 1, false);
+            oTable.fnUpdate('<a class="edit" href="">Edit</a>', nRow, 4, false);
+            oTable.fnDraw();
+        }
+
+        var table = $('#questions_table');
+
+        var oTable = table.dataTable({
+            "lengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            // set the initial value
+            "pageLength": 5,
+
+            "language": {
+                "lengthMenu": " _MENU_ records"
+            },
+            "columnDefs": [{ // set default column settings
+                'orderable': true,
+                'targets': [0]
+            }, {
+                "searchable": true,
+                "targets": [0]
+            }],
+            "order": [
+                [0, "asc"]
+            ] // set first column as a default sort by asc
+        });
+
+        var tableWrapper = $("#sample_editable_1_wrapper");
+
+        tableWrapper.find(".dataTables_length select").select2({
+            showSearchInput: false //hide search box with special css class
+        }); // initialize select2 dropdown
+
+        var nEditing = null;
+        var nNew = false;
+
+        $('#sample_editable_1_new').click(function (e) {
+            e.preventDefault();
+
+            if (nNew && nEditing) {
+                if (confirm("Previose row not saved. Do you want to save it ?")) {
+                    saveRow(oTable, nEditing); // save
+                    $(nEditing).find("td:first").html("Untitled");
+                    nEditing = null;
+                    nNew = false;
+
+                } else {
+                    oTable.fnDeleteRow(nEditing); // cancel
+                    nEditing = null;
+                    nNew = false;
+
+                    return;
+                }
+            }
+
+            var aiNew = oTable.fnAddData(['', '', '', '', '', '']);
+            var nRow = oTable.fnGetNodes(aiNew[0]);
+            editRow(oTable, nRow);
+            nEditing = nRow;
+            nNew = true;
+        });
+
+        table.on('click', '.delete', function (e) {
+            e.preventDefault();
+
+            if (confirm("Are you sure to delete this row ?") == false) {
+                return;
+            }
+
+            var nRow = $(this).parents('tr')[0];
+
+
+            var jqTds = $('td', nRow);
+
+            var companyId = '<?php echo $company->id; ?>';
+            var question = jqTds[1].innerHTML.trim();
+
+            $.ajax({
+                url: "<?php echo URL::route('company.profile.async.deleteQuestion'); ?>",
+                dataType : "json",
+                type : "POST",
+                data : {company_id: companyId, question: question},
+                success : function(data) {
+                    $('div#select_questions_table_box').html(data);
+                    questionsCount --;
+                    QuestionsTableManaged.init();
+                    selectedQuestions = [];
+                }
+            });
+
+            oTable.fnDeleteRow(nRow);
+
+
+        });
+
+        table.on('click', '.cancel', function (e) {
+            e.preventDefault();
+
+            if (nNew) {
+                oTable.fnDeleteRow(nEditing);
+                nNew = false;
+            } else {
+                restoreRow(oTable, nEditing);
+                nEditing = null;
+            }
+        });
+
+        table.on('click', '.edit', function (e) {
+            e.preventDefault();
+
+            /* Get the row as a parent of the link that was clicked on */
+            var nRow = $(this).parents('tr')[0];
+
+            if (nEditing !== null && nEditing != nRow) {
+                /* Currently editing - but not this row - restore the old before continuing to edit mode */
+                restoreRow(oTable, nEditing);
+                editRow(oTable, nRow);
+                nEditing = nRow;
+            } else if (nEditing == nRow && this.innerHTML == "Save") {
+                /* Editing this row and want to save it */
+                saveRow(oTable, nEditing);
+                nEditing = null;
+            } else {
+                /* No edit in progress - let's start one */
+                editRow(oTable, nRow);
+                nEditing = nRow;
+            }
+        });
+    }
+
+    return {
+
+        //main function to initiate the module
+        init: function () {
+            handleTable();
+        }
+
+    };
+
+}();
+
+var TemplatesTableAdvanced = function () {
+
+    var initTable = function () {
+        var table = $('#vi_templates_table');
+
+        /* Formatting function for row details */
+        function fnFormatDetails(oTable, nTr) {
+            var aData = oTable.fnGetData(nTr);
+            var index = oTable.fnGetPosition(nTr);
+
+            var sOut = '<table>';
+            sOut += '<tr><td><b>' + templates[index].title + '</b></td></tr>';
+            sOut += '<tr><td>' + templates[index].description + '</td></tr>';
+            sOut += '</table>';
+
+            return sOut;
+        }
+
+        /*
+         * Insert a 'details' column to the table
+         */
+        var nCloneTh = document.createElement('th');
+        nCloneTh.className = "table-checkbox";
+
+        var nCloneTd = document.createElement('td');
+        nCloneTd.innerHTML = '<span class="row-details row-details-close"></span>';
+
+        table.find('thead tr').each(function () {
+            this.insertBefore(nCloneTh, this.childNodes[0]);
+        });
+
+        table.find('tbody tr').each(function () {
+            this.insertBefore(nCloneTd.cloneNode(true), this.childNodes[0]);
+        });
+
+        /*
+         * Initialize DataTables, with no sorting on the 'details' column
+         */
+        var oTable = table.dataTable({
+            "columnDefs": [{
+                "orderable": false,
+                "targets": [0]
+            }],
+            "order": [
+                [1, 'asc']
+            ],
+            "lengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            // set the initial value
+            "pageLength": 10
+        });
+        var tableWrapper = $('#vi_templates_table_wrapper'); // datatable creates the table wrapper by adding with id {your_table_jd}_wrapper
+
+        tableWrapper.find('.dataTables_length select').select2(); // initialize select2 dropdown
+
+        /* Add event listener for opening and closing details
+         * Note that the indicator for showing which row is open is not controlled by DataTables,
+         * rather it is done here
+         */
+        table.on('click', ' tbody td .row-details', function () {
+            var nTr = $(this).parents('tr')[0];
+            if (oTable.fnIsOpen(nTr)) {
+                /* This row is already open - close it */
+                $(this).addClass("row-details-close").removeClass("row-details-open");
+                oTable.fnClose(nTr);
+            } else {
+                /* Open this row */
+                $(this).addClass("row-details-open").removeClass("row-details-close");
+                oTable.fnOpen(nTr, fnFormatDetails(oTable, nTr), 'details');
+            }
+        });
+
+
+        $('#vi_templates_table_new').click(function (e) {
+            e.preventDefault();
+
+            $('input#js-vi-template-title').val('');
+            $('textarea#js-vi-template-description').val('');
+
+            $('div#viTemplateModal').modal();
+        });
+
+        table.find('a.edit').click(function (e) {
+            e.preventDefault();
+
+            var nRow = $(this).parents('tr')[0];
+            var index = oTable.fnGetPosition(nRow);
+
+            $('input#js-vi-template-title').val(templates[index].title);
+            $('textarea#js-vi-template-description').val(templates[index].description);
+            $('input#js-input-vi-template-id').val(templates[index].id);
+            $('div#viTemplateModal').modal();
+        });
+
+        table.on('click', '.delete', function (e) {
+            e.preventDefault();
+
+            if (confirm("Are you sure to delete this row ?") == false) {
+                return;
+            }
+
+            var nRow = $(this).parents('tr')[0];
+            var index = oTable.fnGetPosition(nRow);
+            var template_id = templates[index].id;
+            oTable.fnDeleteRow(nRow);
+
+            $.ajax({
+                url: "<?php echo URL::route('company.profile.async.deleteVITemplate'); ?>",
+                dataType : "json",
+                type : "POST",
+                data : {template_id: template_id},
+                success : function(data) {
+                    $('div#viTemplateModal').modal('hide');
+                    $('div#vi_templates_table_box').html(data.table);
+                    templates = data.questionnaires;
+                    templatesCount = templates.length;
+                    TemplatesTableAdvanced.init();
+                }
+            });
+
+        });
+    }
+
+    return {
+
+        //main function to initiate the module
+        init: function () {
+
+            if (!jQuery().dataTable) {
+                return;
+            }
+
+            initTable();
+        }
+
+    };
+
+}();
+
+var QuestionnaireTableAdvanced = function () {
+
+    var initTable3 = function () {
+        var table = $('#questionnaires_table');
+
+        /* Formatting function for row details */
+        function fnFormatDetails(oTable, nTr) {
+            var aData = oTable.fnGetData(nTr);
+            var sOut = '<table>';
+            sOut += '<tr><td>Title:</td><td>' + aData[2] + '</td></tr>';
+            sOut += '<tr><td>Questions:</td><td></td></tr>';
+
+            var index = oTable.fnGetPosition(nTr);
+            sOut += questionnaires[index].questions;
+
+            sOut += '</table>';
+
+            return sOut;
+        }
+
+        /*
+         * Insert a 'details' column to the table
+         */
+        var nCloneTh = document.createElement('th');
+        nCloneTh.className = "table-checkbox";
+
+        var nCloneTd = document.createElement('td');
+        nCloneTd.innerHTML = '<span class="row-details row-details-close"></span>';
+
+        table.find('thead tr').each(function () {
+            this.insertBefore(nCloneTh, this.childNodes[0]);
+        });
+
+        table.find('tbody tr').each(function () {
+            this.insertBefore(nCloneTd.cloneNode(true), this.childNodes[0]);
+        });
+
+        /*
+         * Initialize DataTables, with no sorting on the 'details' column
+         */
+        var oTable = table.dataTable({
+            "columnDefs": [{
+                "orderable": false,
+                "targets": [0]
+            }],
+            "order": [
+                [1, 'asc']
+            ],
+            "lengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            // set the initial value
+            "pageLength": 10
+        });
+        var tableWrapper = $('#questionnaires_table_wrapper'); // datatable creates the table wrapper by adding with id {your_table_jd}_wrapper
+
+        tableWrapper.find('.dataTables_length select').select2(); // initialize select2 dropdown
+
+        /* Add event listener for opening and closing details
+         * Note that the indicator for showing which row is open is not controlled by DataTables,
+         * rather it is done here
+         */
+        table.on('click', ' tbody td .row-details', function () {
+            var nTr = $(this).parents('tr')[0];
+            if (oTable.fnIsOpen(nTr)) {
+                /* This row is already open - close it */
+                $(this).addClass("row-details-close").removeClass("row-details-open");
+                oTable.fnClose(nTr);
+            } else {
+                /* Open this row */
+                $(this).addClass("row-details-open").removeClass("row-details-close");
+                oTable.fnOpen(nTr, fnFormatDetails(oTable, nTr), 'details');
+            }
+        });
+
+
+        $('#questionnaires_table_new').click(function (e) {
+            e.preventDefault();
+
+            if (!$('div#questionnaire-title-alert-box').hasClass('hidden')) {
+                $('div#questionnaire-title-alert-box').addClass('hidden');
+            }
+            if (!$('div#questionnaire-questions-alert-box').hasClass('hidden')) {
+                $('div#questionnaire-questions-alert-box').addClass('hidden');
+            }
+            $('input#js-input-questionnaire-title').val('');
+            $('div#questionnaireModal').modal();
+        });
+
+        table.find('a.edit').click(function (e) {
+            e.preventDefault();
+
+            var nTr = $(this).parents('tr')[0];
+            var index = oTable.fnGetPosition(nTr);
+            var selectedQuestionIds = questionnaires[index].questionIds.split(",");
+            $('input#js-input-questionnaire-id').val(questionnaires[index].id);
+
+            selectedQuestions = [];
+            $('div#questions_box').empty();
+
+            $('table#select_questions_table').find('tbody').find('tr').each(function() {
+                var questionId = $(this).find('td').eq(0).find('input').attr('value');
+
+                if ($.inArray(questionId, selectedQuestionIds) >= 0) {
+                    $(this).find('td').eq(0).find('input').prop('checked', true);
+                    $(this).find('td').eq(0).find('input').attr("checked", true);
+                    $(this).addClass("active");
+
+                    selectedQuestions.push(questionId);
+
+                    var objClone = $("div#clone_div_questions").clone().removeClass('hidden');
+                    objClone.attr("id", "question_item_" + questionId);
+                    objClone.find('p#js_p_question').html($(this).find('td').eq(1).html().trim());
+
+                    $('div#questions_box').eq(0).append(objClone);
+                }else {
+                    $(this).find('td').eq(0).find('input').prop('checked', false);
+                    $(this).find('td').eq(0).find('input').attr("checked", false);
+                    $(this).removeClass("active");
+                }
+            });
+
+            $('input#js-input-questionnaire-title').val(questionnaires[index].title);
+
+            if (!$('div#questionnaire-title-alert-box').hasClass('hidden')) {
+                $('div#questionnaire-title-alert-box').addClass('hidden');
+            }
+            if (!$('div#questionnaire-questions-alert-box').hasClass('hidden')) {
+                $('div#questionnaire-questions-alert-box').addClass('hidden');
+            }
+
+            $('div#questionnaireModal').modal();
+        });
+
+        table.on('click', '.delete', function (e) {
+            e.preventDefault();
+
+            if (confirm("Are you sure to delete this row ?") == false) {
+                return;
+            }
+
+            var nRow = $(this).parents('tr')[0];
+            var index = oTable.fnGetPosition(nRow);
+            var questionnaireId = questionnaires[index].id;
+
+            $.ajax({
+                url: "<?php echo URL::route('company.profile.async.deleteQuestionnaire'); ?>",
+                dataType : "json",
+                type : "POST",
+                data : {questionnaires_id: questionnaireId},
+                success : function(data) {
+                    $('div#questionnaires_table_box').html(data.table);
+                    questionnaires = data.questionnaires;
+                    questionnairesCount = questionnaires.length;
+                    QuestionnaireTableAdvanced.init();
+                }
+            });
+
+            oTable.fnDeleteRow(nRow);
+
+        });
+    }
+
+    return {
+
+        //main function to initiate the module
+        init: function () {
+
+            if (!jQuery().dataTable) {
+                return;
+            }
+
+            initTable3();
+        }
+
+    };
+
+}();
+
+var QuestionsTableManaged = function () {
+
+    var initTable1 = function () {
+
+        var table = $('#select_questions_table');
+
+        // begin first table
+        table.dataTable({
+            "columns": [{
+                "orderable": false
+            }, {
+                "orderable": true
+            }],
+            "lengthMenu": [
+                [-1, 5, 15, 20],
+                ["All", 5, 15, 20 ] // change per page values here
+            ],
+            // set the initial value
+            "pageLength": questionsCount,
+            "pagingType": "bootstrap_full_number",
+            "language": {
+                "lengthMenu": "  _MENU_ records",
+                "paginate": {
+                    "previous":"Prev",
+                    "next": "Next",
+                    "last": "Last",
+                    "first": "First"
+                }
+            },
+            "columnDefs": [{  // set default column settings
+                'orderable': false,
+                'targets': [0]
+            }, {
+                "searchable": false,
+                "targets": [0]
+            }],
+            "order": [
+                [1, "asc"]
+            ] // set first column as a default sort by asc
+        });
+
+        var tableWrapper = jQuery('#select_questions_table_wrapper');
+
+        table.find('.group-checkable').change(function () {
+            var set = jQuery(this).attr("data-set");
+            var checked = jQuery(this).is(":checked");
+
+            jQuery(set).each(function () {
+
+                var questionId = $(this).attr('value');
+
+                if (checked) {
+                    $(this).attr("checked", true);
+                    $(this).parents('tr').addClass("active");
+
+                    if ($.inArray(questionId, selectedQuestions) == -1) {
+                        selectedQuestions.push(questionId);
+                    }else {
+                        return;
+                    }
+
+
+
+                    var objClone = $("div#clone_div_questions").clone().removeClass('hidden');
+                    objClone.attr("id", "question_item_" + questionId);
+                    objClone.find('p#js_p_question').html($(this).parents('tr').eq(0).find('td').eq(1).html().trim());
+
+                    $('div#questions_box').eq(0).append(objClone);
+                } else {
+
+                    var found =$.inArray(questionId, selectedQuestions);
+
+                    if (found >= 0) {
+                        selectedQuestions.splice(found, 1);
+                    }
+
+                    $(this).attr("checked", false);
+                    $(this).parents('tr').removeClass("active");
+                    var target = 'div#question_item_' + questionId;
+                    $(target).remove()
+                }
+            });
+            jQuery.uniform.update(set);
+        });
+
+        table.find('input.checkboxes').change(function() {
+            var checked = $(this).is(":checked");
+            var questionId = $(this).attr('value');
+
+            if (checked) {
+
+                $(this).attr("checked", true);
+
+                if ($.inArray(questionId, selectedQuestions) == -1) {
+                    selectedQuestions.push(questionId);
+                }else {
+                    return;
+                }
+
+                var objClone = $("div#clone_div_questions").clone().removeClass('hidden');
+                objClone.attr("id", "question_item_" + questionId);
+                objClone.find('p#js_p_question').html($(this).parents('tr').eq(0).find('td').eq(1).html().trim());
+
+                $('div#questions_box').eq(0).append(objClone);
+            }else {
+
+                var found =$.inArray(questionId, selectedQuestions);
+
+                if (found >= 0) {
+                    selectedQuestions.splice(found, 1);
+                }
+
+                $(this).attr("checked", false);
+                var target = 'div#question_item_' + questionId;
+                $(target).remove();
+            }
+        });
+
+        table.on('change', 'tbody tr .checkboxes', function () {
+            $(this).parents('tr').toggleClass("active");
+        });
+
+        tableWrapper.find('.dataTables_length select').addClass("form-control input-xsmall input-inline"); // modify table per page dropdown
+    }
+
+    return {
+
+        //main function to initiate the module
+        init: function () {
+            if (!jQuery().dataTable) {
+                return;
+            }
+
+            initTable1();
+        }
+
+    };
+
+}();
+
+
+function saveVITemplate(obj) {
+    var title = $('input#js-vi-template-title').val();
+    var description = $('textarea#js-vi-template-description').val();
+    var companyId = '<?php echo $company->id; ?>'
+
+    if (title == '') {
+        $('p#js-p-vi-template-warnning').html('<?php echo trans('company.msg_24'); ?>');
+        $('div#vi-template-alert-box').removeClass('hidden');
+        return;
+    }
+
+    if (description == '') {
+        $('p#js-p-vi-template-warnning').html('<?php echo trans('company.msg_25'); ?>');
+        $('div#vi-template-alert-box').removeClass('hidden');
+        return;
+    }
+
+    var template_id = $('input#js-input-vi-template-id').val();
+
+    $.ajax({
+        url: "<?php echo URL::route('company.profile.async.saveVITemplate'); ?>",
+        dataType : "json",
+        type : "POST",
+        data : {company_id: companyId, title: title, description: description, template_id: template_id},
+        success : function(data) {
+            $('div#viTemplateModal').modal('hide');
+            $('div#vi_templates_table_box').html(data.table);
+            templates = data.questionnaires;
+            templatesCount = templates.length;
+            TemplatesTableAdvanced.init();
+        }
+    });
+}
+
+function saveQuestionnaire(obj) {
+
+    var title = $('input#js-input-questionnaire-title').val();
+
+    if (title == '') {
+        $('div#questionnaire-title-alert-box').removeClass('hidden');
+        return;
+    }else {
+        if (!$('div#questionnaire-title-alert-box').hasClass('hidden')) {
+            $('div#questionnaire-title-alert-box').addClass('hidden');
+        }
+
+    }
+
+    if (selectedQuestions.length == 0) {
+        $('div#questionnaire-questions-alert-box').removeClass('hidden');
+        return;
+    }else {
+        if (!$('div#questionnaire-questions-alert-box').hasClass('hidden')) {
+            $('div#questionnaire-questions-alert-box').addClass('hidden');
+        }
+    }
+
+
+    var companyId = '<?php echo $company->id; ?>';
+    var questions = '';
+    var questionnareId = $('input#js-input-questionnaire-id').val();
+
+    selectedQuestions.forEach(function(item) {
+        if (questions.length != 0) {
+            questions = questions + ',';
+        }
+        questions = questions + item;
+    });
+
+    $.ajax({
+        url: "<?php echo URL::route('company.profile.async.saveQuestionnaire'); ?>",
+        dataType : "json",
+        type : "POST",
+        data : {company_id: companyId, questions: questions, title: title, questionnaire_id: questionnareId},
+        success : function(data) {
+            $('div#questionnaireModal').modal('hide');
+            $('div#questionnaires_table_box').html(data.table);
+            questionnaires = data.questionnaires;
+            questionnairesCount = questionnaires.length;
+            QuestionnaireTableAdvanced.init();
+        }
+    });
+}
+
+
+function hideQuestionnaireTitleAlert(obj) {
+    $('div#questionnaire-title-alert-box').addClass('hidden');
+}
+
+function hideVITemplateAlert(obj) {
+    $('div#vi-template-alert-box').addClass('hidden');
+}
+
+
+function hideQuestionnaireQuestionsAlert(obj) {
+    $('div#questionnaire-questions-alert-box').addClass('hidden');
+}
+
+
+
+
+$(function(){
+    $('.demo2').colorpicker();
+});
+
+/* add event for checkbox */
+$("#is_published").change(function() {
+    if(this.checked) {
+        //Do stuff
+        $("input#is_published").val(1);
+    }else {
+    	$("input#is_published").val(0);
+    }
+});
+
+$("#is_show").change(function() {
+    if(this.checked) {
+        //Do stuff
+        $("input#is_show").val(1);
+    }else {
+    	$("input#is_show").val(0);
+    }
+});
+$("#hide_bids_iframe").change(function() {
+    if(this.checked) {
+        //Do stuff
+        $("input#hide_bids_iframe").val(1);
+    }else {
+    	$("input#hide_bids_iframe").val(0);
+    }
+});
+$("#hide_bonus_iframe").change(function() {
+    if(this.checked) {
+        //Do stuff
+        $("input#hide_bonus_iframe").val(1);
+    }else {
+    	$("input#hide_bonus_iframe").val(0);
+    }
+});
+$("#hide_salary_iframe").change(function() {
+    if(this.checked) {
+        //Do stuff
+        $("input#hide_salary_iframe").val(1);
+    }else {
+    	$("input#hide_salary_iframe").val(0);
+    }
+});
+/*  */
+
+var map;
+var myLatLng;
+var marker;
+var services = [];
+
+
+<?php
+	$i = 0; 
+    foreach ($services as $service) {?>
+    	services['<?php echo $i++;?>'] = {
+    	    	label: '<?php echo $service->name;?>',
+    	    	value: '<?php echo $service->name?>',
+    	    	desc: '<?php echo $service->icon_code?>',
+    	    	serviceId: '<?php echo $service->id?>'
+    	};
+<?php } ?>
+
+<?php 
+	foreach ($companyServices as $companyService) {?>
+		onAddService('<?php echo $companyService->service->name;?>', '<?php echo $companyService->service->icon_code;?>', '<?php echo $companyService->service->id;?>', '<?php echo substr(json_encode($companyService->description), 1, strlen(json_encode($companyService->description)) - 2);?>')
+<?php }?>
+
+<?php
+	foreach ($company->followCompanies as $fCompany) {?>
+        onAddFollowCompany('<?php echo $fCompany->name; ?>');
+<?php }?>
+
+
+function onAddFollowCompany(name) {
+	var objClone = $("div#clone_div_followCompany").clone().removeClass('hidden');
+	objClone.find('#follow_company_name').val(name);
+	objClone.attr("id", "follow_company_item");
+	$('div#follow_company_list').eq(0).append(objClone);
+}
+
+function onDeleteFollowCompany(obj) {
+	$(obj).parents('div#follow_company_item').eq(0).remove();
+}
+
+
+function onAddService(name, code, id, des) {
+	var objClone = $("div#clone_div_service").clone().removeClass('hidden');
+	objClone.attr("id", "service_item");
+	objClone.find("input#service_name").val(name);
+	objClone.find("input#icon_code").val(code);
+	objClone.find("input#service_id").val(id);
+	objClone.find("textarea#service_description").html(des);
+ 	objClone.find("input#service_name").autocomplete({
+ 	 	source: services,
+ 	 	focus: function(event, ui) {
+ 	 			objClone.find("input#service_name").val(ui.item.label);	
+ 	 	 	},
+ 	 	select: function (event, ui) {
+				objClone.find("input#icon_code").val(ui.item.desc);	
+				objClone.find("input#service_id").val(ui.item.serviceId);
+ 	 	 	}
+ 		});
+	$("div#service_list").eq(0).append(objClone);
+}
+
+function onDeleteService(obj) {
+	$(obj).parents('div#service_item').eq(0).remove();
+}
+
+$(document).ready(function() {
+
+    ProfileQuestionsTableEditable.init();
+    QuestionnaireTableAdvanced.init();
+    TemplatesTableAdvanced.init();
+    QuestionsTableManaged.init();
+
+	<?php if (count($companyServices) == 0) {?>
+	onAddService();
+	<?php }?>
+
+	<?php if ($company->followCompanies()->count() == 0) {?>
+	onAddFollowCompany('');
+	<?php }?>
+
+
+	var lat = '<?php echo $company->lat?>';
+	var lng = '<?php echo $company->long?>';
+
+	lat = lat * 1.0;
+	lng = lng * 1.0; 
+
+	var opts = {'center': new google.maps.LatLng(lat, lng), 'zoom':11, 'mapTypeId': google.maps.MapTypeId.ROADMAP } 
+	map = new google.maps.Map(document.getElementById('mapdiv'),opts); 
+
+	google.maps.event.addListener(map,'click',function(event) { 
+ 		document.getElementById('latlng').value = event.latLng.lat() + ', ' + event.latLng.lng();
+ 		document.getElementById('lat').value = event.latLng.lat();
+ 		document.getElementById('lng').value = event.latLng.lng();
+ 		myLatLng = new google.maps.LatLng(event.latLng.lat(), event.latLng.lng());
+ 		if (marker) {
+ 			marker.setMap(null);
+ 		}
+ 		marker = new google.maps.Marker({position:myLatLng});
+ 		marker.setMap(map); 
+	}) 
+	
+	google.maps.event.addListener(map,'mousemove',function(event) { 
+	});	
+	
+	myLatLng = new google.maps.LatLng(lat, lng);
+ 	if (marker) {
+ 		marker.setMap(null);
+ 	}
+ 	marker = new google.maps.Marker({position:myLatLng});
+ 	marker.setMap(map);	
+});
+
+
+function scrollToDiv(obj) {
+    event.preventDefault();
+    var target = "#" + obj.getAttribute('data-target');
+    $('html, body').animate({
+        scrollTop: $(target).offset().top - 110
+    }, 2000);
+}
+
+function reloadMap() {
+    setTimeout(function(){
+        google.maps.event.trigger(map, 'resize');
+        }, 500);
+
+}
+
+
+
+
+$('#input-interview-logo').change(function() {
+    if (this.files && this.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            $('#img-interview-logo').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(this.files[0]);
+    }
+});
+
+$('#input-interview-image').change(function() {
+    if (this.files && this.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            $('#img-interview-image').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(this.files[0]);
+    }
+});
+
+
+$('#input-interview-background').change(function() {
+    if (this.files && this.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            $('#img-interview-background').attr('src', e.target.result);
+        }
+        reader.readAsDataURL(this.files[0]);
+    }
+});
+
+
+</script>

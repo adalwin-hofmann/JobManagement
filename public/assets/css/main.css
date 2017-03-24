@@ -1,0 +1,136 @@
+body{
+    display:block;
+    padding:0;
+    margin:0;
+    overflow: hidden;
+}
+
+
+h2{
+    top:40%;
+    color:black;
+    font-size: 40px;
+}
+
+
+.logo{
+    display:block;
+    text-indent:10000px;
+    overflow:hidden;
+    background: white url('/assets/img/logo.png') center center no-repeat;
+    background-position-y:50%;
+    height:100%;
+    width:100%;
+}
+
+nav{
+    background:white;
+    border-bottom:2px solid black;
+    position:fixed;
+    left:0;
+    top:0;
+    z-index:10;
+    width:100%;
+}
+
+nav ul{
+overflow:auto;
+list-style:none;
+margin:0;
+}
+
+nav li{
+    float:left;
+}
+
+nav a{
+    color:#253652;
+    font-family:verdana;
+    display:block;
+    padding:20px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+nav a:hover{
+    background:#253652;
+    color:white;
+}
+
+a{
+    color:#253652;
+    font-family:verdana;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+
+.overlay {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+}
+
+.overlay-top {
+    width: 100%;
+    height: 25%;
+    background-color: rgba(0, 82, 208, 0.9);
+    position: fixed;
+    top: 0;
+    z-index: 10000;
+}
+
+.overlay-bottom {
+    width: 100%;
+    height: 70%;
+    background-color: rgba(0, 82, 208, 0.9);
+    position: fixed;
+    top: 32%;
+    z-index: 10000;
+}
+
+.button-layer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 80px;
+    background-color: rgba(1, 15, 52, 0.9);
+    z-index: 10000;
+}
+
+.prev-button {
+    font-size: 25px;
+    color: white;
+    background-color: #021642;
+    border: 0px;
+}
+
+.next-button {
+    font-size: 25px;
+    color: white;
+    margin-left: 10px;
+    margin-right: 20px;
+    background-color: #021642;
+    border: 0px;
+}
+
+.description-layer {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.p-description {
+    position: absolute;
+    bottom: 0px;
+    color: white;
+    background-color: rgb(237, 0, 0);
+    display: inline-block;
+    padding: 2px 10px 2px 10px;
+}
+
+
+.datepicker.datepicker-dropdown.dropdown-menu.datepicker-orient-left.datepicker-orient-top {
+    z-index: 100000 !important;
+}

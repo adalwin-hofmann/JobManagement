@@ -1,0 +1,1169 @@
+<?php $__env->startSection('custom-styles'); ?>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.2/themes/smoothness/jquery-ui.css">
+
+	<?php echo HTML::style('/assets/metronic/assets/global/plugins/select2/select2.css'); ?>
+
+	<?php echo HTML::style('/assets/metronic/assets/global/plugins/datatables/plugins/bootstrap/dataTables.bootstrap.css'); ?>
+
+	<?php echo HTML::style('/assets/metronic/assets/global/css/plugins.css'); ?>
+
+
+	<?php echo HTML::style('/assets/css/bootstrap-colorpicker.min.css'); ?>
+
+	<?php echo HTML::style('/assets/css/docs.css'); ?>
+
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('body'); ?>
+<main class="auth gray-container padding-top-xs padding-bottom-xs">
+    
+    <div class="container" style="background-color: white;">
+	    <div class="row">
+		    <div class="col-sm-4 col-sm-offset-4 margin-top-lg">
+		        <?php if($errors->has()): ?>
+		        <div class="alert alert-danger alert-dismissibl fade in">
+		            <button type="button" class="close" data-dismiss="alert">
+		                <span aria-hidden="true">&times;</span>
+		                <span class="sr-only"><?php echo trans('company.close'); ?></span>
+		            </button>
+		            <?php foreach($errors->all() as $error): ?>
+		        		<p><?php echo $error; ?></p>		
+		        	<?php endforeach; ?>
+		        </div>
+		        <?php endif; ?>    
+		        
+		        <?php if (isset($alert)) { ?>
+		        <div class="alert alert-<?php echo $alert['type'];?> alert-dismissibl fade in">
+		            <button type="button" class="close" data-dismiss="alert">
+		                <span aria-hidden="true">&times;</span>
+		                <span class="sr-only"><?php echo trans('company.close'); ?></span>
+		            </button>
+		            <p>
+		                <?php echo $alert['msg'];?>
+		            </p>
+		        </div>
+		        <?php } ?>
+		    </div>    
+	    </div> 
+	    
+	    
+	    <form method="POST" action="<?php echo URL::route('company.saveProfile'); ?>" role="form" class="form-login margin-top-normal" enctype="multipart/form-data">
+	    
+	    	<input type="hidden" name="company_id" value="<?php echo $company->id; ?>">
+	    	
+	    	<div class="text-center">
+	    		<h2 class="signup-sub-title"><i class="fa fa-briefcase"></i> <?php echo trans('company.edit_company_profile'); ?></h2>
+	    		<p class="signup-sub-description"><?php echo trans('company.msg_08'); ?></p>
+	    	</div>
+
+            <div class="form-group">
+	    	    <div class="col-sm-12 margin-top-lg">
+                    <ul class="nav nav-tabs custom-nav-tabs text-center">
+                        <li class="active"><a href="#tab-general" data-toggle="tab" class="text-uppercase"><i class="fa fa-file-text-o"></i> <?php echo trans('company.general'); ?></a></li>
+                        <li class=""><a href="#tab-services" data-toggle="tab" class="text-uppercase"><i class="fa fa-bar-chart-o"></i> <?php echo trans('company.services'); ?></a></li>
+                        <li class=""><a href="#tab-contact" data-toggle="tab" onclick="reloadMap()" class="text-uppercase"><i class="fa fa-bookmark"></i> <?php echo trans('company.contact_details'); ?></a></li>
+                        <li class=""><a href="#tab-rejection-template" data-toggle="tab" class="text-uppercase"><i class="fa fa-paper-plane-o"></i> <?php echo trans('company.email_template'); ?></a></li>
+                        <li class=""><a href="#tab-iframe" data-toggle="tab" class="text-uppercase"><i class="fa fa-rocket"></i> <?php echo trans('company.iframe'); ?></a></li>
+                        <li class=""><a href="#tab-follow-company" data-toggle="tab" class="text-uppercase"><i class="fa fa-building-o"></i> <?php echo trans('company.follow_company'); ?></a></li>
+                        <li class=""><a href="#tab-video-interview-template" data-toggle="tab" class="text-uppercase"><i class="fa fa-video-camera"></i> <?php echo trans('company.video_interview_template'); ?></a></li>
+                    </ul>
+
+                    <div class="tab-content" id="custom-tab-content">
+                        <div class="tab-pane row fade active in" id="tab-general">
+                            <div class="form-group" id="div-general">
+                                <div class="row">
+                                    <div class="col-sm-5 col-sm-offset-1">
+                                        <?php foreach([
+                                            'email' => trans('company.email').':',
+                                            'password' => trans('company.password').':',
+                                            'password_confirmation' => trans('company.confirm_password').':',
+                                            'name' => trans('company.name').':',
+                                            'tag' => trans('company.tag_line').':',
+                                            'year' => trans('company.foundation_year').':',
+                                            'teamsize_id' => trans('company.team_size').':',
+                                            'category_id' => trans('company.category').':',
+                                            'city_id' => trans('company.location').':',
+                                        ] as $key => $value): ?>
+                                            <div class="row margin-top-sm">
+                                                <div class="form-group">
+                                                    <label class="col-sm-5"><?php echo Form::label($key, $value, ['class' => 'margin-top-xs']); ?></label>
+                                                    <div class="col-sm-7">
+                                                        <?php if($key == 'city_id'): ?>
+                                                            <?php echo Form::select($key
+                                                               , $cities->lists('name', 'id')
+                                                               , $company->city_id
+                                                               , array('class' => 'form-control')); ?>
+
+                                                        <?php elseif($key == 'category_id'): ?>
+                                                            <?php echo Form::select($key
+                                                               , $categories->lists('name', 'id')
+                                                               , $company->category_id
+                                                               , array('class' => 'form-control')); ?>
+
+                                                        <?php elseif($key == 'teamsize_id'): ?>
+                                                            <select class="form-control" name="teamsize_id" id="teamsize_id">
+                                                                <?php foreach($teamsizes as $item): ?>
+                                                                <option value="<?php echo $item->id; ?>" <?php echo $company->teamsize_id == $item->id ? 'selected':''; ?>><?php echo $item->min." ~ ".$item->max; ?></option>
+                                                                <?php endforeach; ?>
+                                                            </select>
+                                                        <?php elseif($key == 'password'): ?>
+                                                            <?php echo Form::password($key, array('class' => 'form-control')); ?>
+
+                                                        <?php elseif($key == 'password_confirmation'): ?>
+                                                            <?php echo Form::password($key, array('class' => 'form-control')); ?>
+
+                                                        <?php else: ?>
+                                                            <?php echo Form::text($key, $company->{$key}, ['class' => 'form-control']); ?>
+
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <div class="col-sm-5 padding-left-normal">
+                                        <div class="form-group margin-top-sm">
+                                            <?php if($company->logo != '') {?>
+                                                <div class="margin-bottom-xs">
+                                                    <img src="<?php echo HTTP_LOGO_PATH.$company->logo; ?>" style="width: 100%;">
+                                                </div>
+                                                <div>
+                                                    <div class="col-sm-4">
+                                                        <label><?php echo Form::label('about', 'Description:'); ?></label>
+                                                    </div>
+                                                    <div class="col-sm-4 col-sm-offset-4" style="padding: 0px;">
+                                                        <div class="fileUpload">
+                                                            <span><i class="fa fa-picture-o"></i> <?php echo trans('company.change_logo'); ?></span>
+                                                            <input type="file" class="upload" name="logo"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <?php echo Form::textarea('description', $company->description, ['class' => 'form-control']); ?>
+
+                                                </div>
+                                            <?php }else {?>
+                                                <div>
+                                                    <div class="col-sm-4">
+                                                        <label><?php echo Form::label('about', trans('company.description').':'); ?></label>
+                                                    </div>
+                                                    <div class="col-sm-4 col-sm-offset-4" style="padding: 0px;">
+                                                        <div class="fileUpload">
+                                                            <span><i class="fa fa-picture-o"></i> Logo</span>
+                                                            <input type="file" class="upload" name="logo"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <?php echo Form::textarea('description', $company->description, ['class' => 'form-control auth-about']); ?>
+
+                                                </div>
+                                            <?php }?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane row fade" id="tab-services">
+                            <div class="text-center col-sm-10 col-sm-offset-1 margin-top-lg" id="div-service">
+                                <h2 class="signup-sub-title"><i class="fa fa-bar-chart-o"></i> <?php echo trans('company.services'); ?></h2>
+                                <p class="signup-sub-description"><?php echo trans('company.msg_19'); ?></p>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-10 col-sm-offset-1 margin-top-sm">
+                                    <hr/>
+                                </div>
+                            </div>
+
+                            <div id="service_list"></div>
+
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-sm-2 col-sm-offset-1">
+                                        <div class="row margin-top-sm padding-left-sm">
+                                            <div class="form-group">
+                                                <label for="" class="margin-top-xs"><?php echo trans('company.expertise'); ?>:</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="row margin-top-sm signup-long-input">
+                                            <div class="form-group">
+                                                <input class="form-control" name="expertise" type="text" value="<?php echo $company->expertise; ?>">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-2 col-sm-offset-1">
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="row signup-long-input">
+                                            <div class="form-group">
+                                                <p><?php echo trans('company.msg_10'); ?></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-sm-10 col-sm-offset-1 margin-top-sm">
+                                    <hr/>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="tab-pane row fade" id="tab-contact">
+                            <div class="text-center col-sm-10 col-sm-offset-1 margin-top-lg" id="div-contact">
+                	    		<h2 class="signup-sub-title"><i class="fa fa-bookmark"></i> <?php echo trans('company.contact_details'); ?></h2>
+                	    		<p class="signup-sub-description"><?php echo trans('company.msg_11'); ?></p>
+                	    	</div>
+
+                			<div class="form-group">
+                				<div class="col-sm-10 col-sm-offset-1 margin-top-sm">
+                					<hr/>
+                				</div>
+                			</div>
+
+                			<div class="form-group">
+                				<div class="row">
+                					<div class="col-sm-5 col-sm-offset-1">
+                						<div class="row margin-top-sm">
+                							<div class="form-group">
+                								<label class="col-sm-5"><?php echo Form::label('', trans('company.address').':', ['class' => 'margin-top-xs']); ?></label>
+                								<div class="col-sm-7">
+                									<?php echo Form::text('address', $company->address, ['class' => 'form-control']); ?>
+
+                								</div>
+                							</div>
+                						</div>
+                					</div>
+                					<div class="col-sm-5 padding-left-normal">
+                						<div class="row margin-top-sm">
+                							<div class="form-group">
+                								<label class="col-sm-5"><?php echo Form::label('', trans('company.facebook').':', ['class' => 'margin-top-xs']); ?></label>
+                								<div class="col-sm-7">
+                									<?php echo Form::text('facebook', $company->facebook, ['class' => 'form-control']); ?>
+
+                								</div>
+                							</div>
+                						</div>
+                					</div>
+                				</div>
+                			</div>
+
+                			<div class="form-group">
+                				<div class="row">
+                					<div class="col-sm-5 col-sm-offset-1">
+                						<div class="row margin-top-sm">
+                							<div class="form-group">
+                								<label class="col-sm-5"><?php echo Form::label('', trans('company.phone_number').':', ['class' => 'margin-top-xs']); ?></label>
+                								<div class="col-sm-7">
+                									<?php echo Form::text('phone', $company->phone, ['class' => 'form-control']); ?>
+
+                								</div>
+                							</div>
+                						</div>
+                					</div>
+                					<div class="col-sm-5 padding-left-normal">
+                						<div class="row margin-top-sm">
+                							<div class="form-group">
+                								<label class="col-sm-5"><?php echo Form::label('', trans('company.linkedin').':', ['class' => 'margin-top-xs']); ?></label>
+                								<div class="col-sm-7">
+                									<?php echo Form::text('linkedin', $company->linkedin, ['class' => 'form-control']); ?>
+
+                								</div>
+                							</div>
+                						</div>
+                					</div>
+                				</div>
+                			</div>
+
+                			<div class="form-group">
+                				<div class="row">
+                					<div class="col-sm-5 col-sm-offset-1">
+                						<div class="row margin-top-sm">
+                							<div class="form-group">
+                								<label class="col-sm-5"><?php echo Form::label('', trans('company.website').':', ['class' => 'margin-top-xs']); ?></label>
+                								<div class="col-sm-7">
+                									<?php echo Form::text('website', $company->website, ['class' => 'form-control']); ?>
+
+                								</div>
+                							</div>
+                						</div>
+                					</div>
+                					<div class="col-sm-5 padding-left-normal">
+                						<div class="row margin-top-sm">
+                							<div class="form-group">
+                								<label class="col-sm-5"><?php echo Form::label('', trans('company.twitter').':', ['class' => 'margin-top-xs']); ?></label>
+                								<div class="col-sm-7">
+                									<?php echo Form::text('twitter', $company->twitter, ['class' => 'form-control']); ?>
+
+                								</div>
+                							</div>
+                						</div>
+                					</div>
+                				</div>
+                			</div>
+
+                			<div class="form-group">
+                				<div class="row">
+                					<div class="col-sm-5 col-sm-offset-1">
+                						<div class="row margin-top-sm">
+                							<div class="form-group margin-top-xs">
+                								<div class="col-sm-7 col-sm-offset-5">
+                				                    <?php echo Form::checkbox('is_published', $company->is_published, $company->is_published, ['class' => 'checkbox-normal', 'id' => 'is_published', 'style' => 'height: 19px !important;']); ?>
+
+                				                    <label class="control-checkbox"><?php echo trans('company.msg_14'); ?></label>
+                								</div>
+                							</div>
+                						</div>
+                					</div>
+                					<div class="col-sm-5 padding-left-normal">
+                						<div class="row margin-top-sm">
+                							<div class="form-group">
+                								<label class="col-sm-5"><?php echo Form::label('', trans('company.google').'+:', ['class' => 'margin-top-xs']); ?></label>
+                								<div class="col-sm-7">
+                									<?php echo Form::text('google', $company->google, ['class' => 'form-control']); ?>
+
+                								</div>
+                							</div>
+                						</div>
+                					</div>
+                				</div>
+                			</div>
+
+
+                			<div class="form-group" style="margin-bottom: 0px;">
+                				<div class="row">
+                					<div class="col-sm-2 col-sm-offset-1">
+                						<div class="row margin-top-sm padding-left-sm">
+                							<div class="form-group">
+                								<?php echo Form::label('', trans('company.google_maps_address').':', ['class' => 'margin-top-xs']); ?>
+
+                							</div>
+                						</div>
+                					</div>
+                					<div class="col-sm-8">
+                						<div class="row margin-top-sm signup-long-input">
+                							<div class="form-group">
+                								<?php echo Form::text('latlng', $company->lat.', '.$company->long, ['class' => 'form-control', 'readonly', 'id' => 'latlng']); ?>
+
+                							</div>
+                						</div>
+                					</div>
+                				</div>
+                			</div>
+
+                	        <input type="hidden" name="lat" value="<?php echo $company->lat; ?>" id="lat">
+                	        <input type="hidden" name="lng" value="<?php echo $company->long; ?>" id="lng">
+                	        <input type="hidden" name="is_finished" value="1" id="is_finished">
+
+                			<div class="form-group">
+                				<div class="row">
+                					<div class="col-sm-10 col-sm-offset-1">
+                						<div class="row signup-long-input">
+                							<div id="mapdiv" style="height:200px;"></div>
+                						</div>
+                					</div>
+                				</div>
+                			</div>
+                        </div>
+                        <div class="tab-pane row fade" id="tab-rejection-template">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="text-center col-sm-10 col-sm-offset-1 margin-top-lg" id="div-service">
+                                        <p class="signup-sub-description"><?php echo trans('company.rejection_template_for_apply'); ?></p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-sm-10 col-sm-offset-1">
+                                            <hr/>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-10 col-sm-offset-1">
+                                        <?php foreach([
+                                            'apply_rejection_title' => trans('company.title'),
+                                            'apply_rejection_content' => trans('company.description'),
+                                        ] as $key => $value): ?>
+                                            <div class="row margin-top-sm">
+                                                <div class="form-group">
+                                                    <label class="col-sm-3"><?php echo Form::label($key, $value, ['class' => 'margin-top-xs']); ?></label>
+                                                    <div class="col-sm-9">
+                                                        <?php if($key == 'apply_rejection_content'): ?>
+                                                            <?php echo Form::textarea($key, $company->{$key}, ['class' => 'form-control']); ?>
+
+                                                        <?php else: ?>
+                                                            <?php echo Form::text($key, $company->{$key}, ['class' => 'form-control']); ?>
+
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+
+                                    <div class="text-center col-sm-10 col-sm-offset-1 margin-top-lg" id="div-service">
+                                        <p class="signup-sub-description"><?php echo trans('company.rejection_template_for_recommendation'); ?></p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-sm-10 col-sm-offset-1">
+                                            <hr/>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-10 col-sm-offset-1">
+                                        <?php foreach([
+                                            'hint_rejection_title' => trans('company.title'),
+                                            'hint_rejection_content' => trans('company.description'),
+                                        ] as $key => $value): ?>
+                                            <div class="row margin-top-sm">
+                                                <div class="form-group">
+                                                    <label class="col-sm-3"><?php echo Form::label($key, $value, ['class' => 'margin-top-xs']); ?></label>
+                                                    <div class="col-sm-9">
+                                                        <?php if($key == 'hint_rejection_content'): ?>
+                                                            <?php echo Form::textarea($key, $company->{$key}, ['class' => 'form-control']); ?>
+
+                                                        <?php else: ?>
+                                                            <?php echo Form::text($key, $company->{$key}, ['class' => 'form-control']); ?>
+
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane row fade" id="tab-iframe">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="text-center col-sm-10 col-sm-offset-1 margin-top-lg" id="div-service">
+                                        <p class="signup-sub-description"><?php echo trans('company.iframe_link_url_for_job'); ?></p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-sm-10 col-sm-offset-1">
+                                            <hr/>
+                                        </div>
+                                    </div>
+
+                                    <div class="row margin-top-sm">
+                                        <div class="col-sm-10 col-sm-offset-1">
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <label class="col-sm-3"><label class="margin-top-xs"><?php echo trans('company.url'); ?>:</label></label>
+                                                    <div class="col-sm-9">
+                                                        <input class="form-control" type="text" value="<?php echo HTTP_PATH.'widget/'.$company->slug; ?>" disabled>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row margin-top-sm">
+                                                <div class="form-group">
+                                                    <label class="col-sm-3"><label class="margin-top-xs"><?php echo trans('company.overlay_color'); ?>:</label></label>
+                                                    <div class="col-sm-9">
+                                                        <div class="input-group demo2">
+                                                            <input type="text" value="<?php echo ($company->overlay_color == '') ? 'rgba(0, 82, 208, 0.9)' : $company->overlay_color; ?>" class="form-control" name="overlay_color" />
+                                                            <span class="input-group-addon"><i></i></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="form-group">
+                                                    <div class="row">
+                                                        <div class="col-sm-9 col-sm-offset-3">
+                                                            <div class="row margin-top-sm">
+                                                                <div class="form-group margin-top-xs">
+                                                                    <div class="col-sm-12">
+                                                                        <?php echo Form::checkbox('is_show', $company->is_show, $company->is_show, ['class' => 'checkbox-normal', 'id' => 'is_show', 'style' => 'height: 19px !important;']); ?>
+
+                                                                        <label class="control-checkbox"> <?php echo trans('company.msg_20'); ?></label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-9 col-sm-offset-3">
+                                                            <div class="row margin-top-sm">
+                                                                <div class="form-group margin-top-xs">
+                                                                    <div class="col-sm-12">
+                                                                        <?php echo Form::checkbox('hide_bids_iframe', $company->hide_bids_iframe, $company->hide_bids_iframe, ['class' => 'checkbox-normal', 'id' => 'hide_bids_iframe', 'style' => 'height: 19px !important;']); ?>
+
+                                                                        <label class="control-checkbox"> Hide bids on job list page</label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-9 col-sm-offset-3">
+                                                            <div class="row margin-top-sm">
+                                                                <div class="form-group margin-top-xs">
+                                                                    <div class="col-sm-12">
+                                                                        <?php echo Form::checkbox('hide_bonus_iframe', $company->hide_bonus_iframe, $company->hide_bonus_iframe, ['class' => 'checkbox-normal', 'id' => 'hide_bonus_iframe', 'style' => 'height: 19px !important;']); ?>
+
+                                                                        <label class="control-checkbox"> Hide bonus on job list page</label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-sm-9 col-sm-offset-3">
+                                                            <div class="row margin-top-sm">
+                                                                <div class="form-group margin-top-xs">
+                                                                    <div class="col-sm-12">
+                                                                        <?php echo Form::checkbox('hide_salary_iframe', $company->hide_salary_iframe, $company->hide_salary_iframe, ['class' => 'checkbox-normal', 'id' => 'hide_salary_iframe', 'style' => 'height: 19px !important;']); ?>
+
+                                                                        <label class="control-checkbox"> Hide salary on job list page</label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane row fade" id="tab-follow-company">
+                            <div id="follow_company_list"></div>
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-sm-5 col-sm-offset-1">
+                                        <div class="row">
+                                            <div class="form-group">
+                                                <div class="col-sm-7 col-sm-offset-5">
+                                                    <a style="color: #2980b9; cursor: pointer;" onclick="onAddFollowCompany('');"><i class="fa fa-plus-circle"></i> <?php echo trans('company.add_new_follow_company'); ?></a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane row fade" id="tab-video-interview-template">
+                            <div class="form-group">
+                                <div class="row">
+
+                                    <!-- Video Interview Screeen -->
+                                    <div class="text-center col-sm-10 col-sm-offset-1 margin-top-lg" id="div-service">
+                                        <p class="signup-sub-description"><?php echo trans('company.video_interview_screen'); ?></p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-sm-10 col-sm-offset-1">
+                                            <hr/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-sm-8 col-sm-offset-2 video-interview-screen">
+                                                <div class="col-sm-10 col-sm-offset-1">
+                                                    <div class="video-interview-header">
+                                                        <img src="<?php echo $company->video_interview_logo == '' ? HTTP_LOGO_PATH.'default_company_logo.gif' : HTTP_LOGO_PATH.$company->video_interview_logo; ?>" class="video-interview-company-logo" id="img-interview-logo">
+                                                        <input type="file" class="upload" name="video-interview-logo" id="input-interview-logo">
+                                                    </div>
+
+                                                    <div class="video-interview-body">
+                                                        <div class="col-sm-12 text-right">
+                                                            <?php echo date('d/m/Y'); ?>
+
+                                                        </div>
+                                                        <div class="video-interview-body-content">
+                                                            <img src="<?php echo $company->video_interview_image == '' ? HTTP_COMPANY_PHOTO_PATH.'default.jpg' : HTTP_COMPANY_PHOTO_PATH.$company->video_interview_image; ?>" class="video-interview-company-image" id="img-interview-image">
+                                                            <div class="video-interview-text-box">
+                                                                <textarea class="video-interview-text" name="video-interview-text"><?php echo $company->video_interview_text == '' ? str_replace("<br/>", "\n", "Vacancy<br/>Cammio Video Pitch") : $company->video_interview_text; ?></textarea>
+                                                            </div>
+                                                            <img src="<?php echo HTTP_COMPANY_PHOTO_PATH.'stepbar.png'; ?>" class="video-interview-stepbar">
+                                                            <input type="file" class="upload" name="video-interview-image"  id="input-interview-image">
+                                                        </div>
+                                                        <img src="<?php echo HTTP_COMPANY_PHOTO_PATH.'bottombar.png'; ?>" style="width: 100%;">
+                                                    </div>
+                                                </div>
+                                                <img src="<?php echo $company->video_interview_background != '' ? HTTP_COMPANY_PHOTO_PATH.$company->video_interview_background : ''; ?>" class="video-interview-screen-background" id="img-interview-background">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-sm-8 col-sm-offset-2">
+                                                <p><?php echo trans('company.msg_36'); ?></p>
+                                                <p><?php echo trans('company.msg_37'); ?></p>
+                                                <p><?php echo trans('company.msg_38'); ?></p>
+                                                <div>
+                                                    <div class="interview-fileUpload">
+                                                        4. <span><i class="fa fa-picture-o"></i> Change Background</span>
+                                                        <input type="file" class="upload" name="video-interview-background" id="input-interview-background">
+                                                    </div>
+                                                </div>
+                                                <div class="margin-top-xs">
+                                                    <?php echo trans('company.msg_44'); ?>
+
+                                                    <?php
+                                                        $interviewText = "Thank you for your responses.\nWe will review it and will let you know.\nBest regards.";
+                                                        if ($company->video_interview_end != '') $interviewText = $company->video_interview_end;
+                                                    ?>
+                                                    <div class="col-sm-12 margin-top-xs">
+                                                        <textarea name="video-interview-end" rows="5" style="width: 100%;"><?php echo $interviewText; ?></textarea>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Questions & Questionnaires -->
+                                    <div class="text-center col-sm-10 col-sm-offset-1 margin-top-lg" id="div-service">
+                                        <p class="signup-sub-description"><?php echo trans('company.questions_questionnaires'); ?></p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-sm-10 col-sm-offset-1">
+                                            <hr/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-sm-10 col-sm-offset-1">
+                                            <div class="portlet box blue">
+                                                <div class="portlet-title">
+                                                    <div class="caption">
+                                                        <i class="fa fa-edit"></i><?php echo trans('company.questions_table'); ?>
+
+                                                    </div>
+                                                </div>
+                                                <div class="portlet-body">
+                                                    <div class="table-toolbar">
+                                                        <div class="btn-group">
+                                                            <a id="sample_editable_1_new" class="btn green">
+                                                            Add New <i class="fa fa-plus"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <table class="table table-striped table-hover table-bordered" id="questions_table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>
+                                                                    #
+                                                                </th>
+                                                                <th>
+                                                                    <?php echo trans('company.question'); ?>
+
+                                                                </th>
+                                                                <th>
+                                                                    <?php echo trans('company.time'); ?>
+
+                                                                </th>
+                                                                <th>
+                                                                    <?php echo trans('company.edit'); ?>
+
+                                                                </th>
+                                                                <th>
+                                                                    <?php echo trans('company.delete'); ?>
+
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <?php foreach($questions as $key => $value): ?>
+                                                            <tr>
+                                                                <td>
+                                                                    <?php echo $key + 1; ?>
+
+                                                                </td>
+                                                                <td>
+                                                                    <?php echo $value->question; ?>
+
+                                                                </td>
+                                                                <td>
+                                                                    <?php echo $value->time; ?>
+
+                                                                </td>
+                                                                <td>
+                                                                    <a class="edit" href="javascript:;">
+                                                                        Edit
+                                                                    </a>
+                                                                </td>
+                                                                <td>
+                                                                    <a class="delete" href="javascript:;">
+                                                                        Delete
+                                                                    </a>
+                                                                </td>
+                                                            </tr>
+                                                            <?php endforeach; ?>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+
+
+
+                                            <div class="portlet box blue margin-top-xs">
+                                                <div class="portlet-title">
+                                                    <div class="caption">
+                                                        <i class="fa fa-edit"></i><?php echo trans('company.questionnaires_table'); ?>
+
+                                                    </div>
+                                                </div>
+                                                <div class="portlet-body">
+                                                    <div class="table-toolbar">
+                                                        <div class="btn-group">
+                                                            <a id="questionnaires_table_new" class="btn green">
+                                                            Add New <i class="fa fa-plus"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <div id="questionnaires_table_box">
+                                                        <table class="table table-striped table-hover table-bordered" id="questionnaires_table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>
+                                                                        #
+                                                                    </th>
+                                                                    <th>
+                                                                        <?php echo trans('company.title'); ?>
+
+                                                                    </th>
+                                                                    <th>
+                                                                        <?php echo trans('company.edit'); ?>
+
+                                                                    </th>
+                                                                    <th>
+                                                                        <?php echo trans('company.delete'); ?>
+
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <?php foreach($questionnaires as $key => $value): ?>
+                                                                <tr>
+                                                                    <td>
+                                                                        <?php echo $key + 1; ?>
+
+                                                                    </td>
+                                                                    <td>
+                                                                        <?php echo $value->title; ?>
+
+                                                                    </td>
+                                                                    <td>
+                                                                        <a class="edit" href="javascript:;">
+                                                                            Edit
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>
+                                                                        <a class="delete" href="javascript:;">
+                                                                            Delete
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                                <?php endforeach; ?>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Video Interview Template -->
+                                    <div class="text-center col-sm-10 col-sm-offset-1 margin-top-lg" id="div-service">
+                                        <p class="signup-sub-description"><?php echo trans('company.video_interview_template'); ?></p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-sm-10 col-sm-offset-1">
+                                            <hr/>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-sm-10 col-sm-offset-1">
+                                            <div class="portlet box blue margin-top-xs">
+                                                <div class="portlet-title">
+                                                    <div class="caption">
+                                                        <i class="fa fa-edit"></i><?php echo trans('company.templates_table'); ?>
+
+                                                    </div>
+                                                </div>
+                                                <div class="portlet-body">
+                                                    <div class="table-toolbar">
+                                                        <div class="btn-group">
+                                                            <a id="vi_templates_table_new" class="btn green">
+                                                            Add New <i class="fa fa-plus"></i>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <div id="vi_templates_table_box">
+                                                        <table class="table table-striped table-hover table-bordered" id="vi_templates_table">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>
+                                                                        #
+                                                                    </th>
+                                                                    <th>
+                                                                        <?php echo trans('company.title'); ?>
+
+                                                                    </th>
+                                                                    <th>
+                                                                        <?php echo trans('company.edit'); ?>
+
+                                                                    </th>
+                                                                    <th>
+                                                                        <?php echo trans('company.delete'); ?>
+
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <?php foreach($templates as $key => $value): ?>
+                                                                <tr>
+                                                                    <td>
+                                                                        <?php echo $key + 1; ?>
+
+                                                                    </td>
+                                                                    <td>
+                                                                        <?php echo $value->title; ?>
+
+                                                                    </td>
+                                                                    <td>
+                                                                        <a class="edit" href="javascript:;">
+                                                                            Edit
+                                                                        </a>
+                                                                    </td>
+                                                                    <td>
+                                                                        <a class="delete" href="javascript:;">
+                                                                            Delete
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                                <?php endforeach; ?>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+	        <div class="row padding-bottom-xl">
+	            <div class="col-sm-2 col-sm-offset-5 margin-top-normal">
+	                <button class="btn btn-lg btn-primary text-uppercase btn-block"><?php echo trans('company.save'); ?> <span class="glyphicon glyphicon-ok-circle"></span></button>
+	            </div>
+	        </div>
+	    </form>    
+    </div>
+           
+</main>
+
+
+<!-- Model Div for Follow Company -->
+<div id="clone_div_followCompany" class="hidden">
+	<div class="form-group">
+		<div class="row">
+            <div class="col-sm-2 col-sm-offset-1">
+                <div class="row margin-top-sm padding-left-sm">
+                    <div class="form-group">
+                        <label for="" class="margin-top-xs"><?php echo trans('company.follow_company'); ?>:</label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <div class="row margin-top-sm signup-long-input">
+                    <div class="form-group">
+                        <input class="form-control" name="follow_company_name[]" type="text" value="" id="follow_company_name">
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="row margin-top-sm signup-long-input">
+                    <div class="form-group margin-top-xs">
+                        <a style="color: #e74c3c; cursor: pointer;" onclick="onDeleteFollowCompany(this);"><i class="fa fa-trash"></i> <?php echo trans('company.delete_follow_company'); ?></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+	</div>
+</div>
+<!-- EOF for Follow Company -->
+
+<!-- Modal Div for Add Template -->
+<div class="modal fade" id="viTemplateModal" tabindex="-1" role="dialog" aria-labelledby="msgModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="msgModalLabel"><?php echo trans('company.video_interview_template'); ?></h4>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group ">
+                    <div class="row margin-bottom-xs">
+                        <input type="hidden" value="" id="js-input-vi-template-id" />
+                        <div class="col-sm-3">
+                            <label class="margin-top-xs"><?php echo trans('company.title'); ?>:</label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" id="js-vi-template-title">
+                        </div>
+
+                        <div class="col-sm-3 margin-top-xs">
+                            <label class="margin-top-xs"><?php echo trans('company.description'); ?>:</label>
+                        </div>
+                        <div class="col-sm-9 margin-top-xs">
+                            <textarea  class="form-control" id="js-vi-template-description" rows="10"></textarea>
+                        </div>
+
+                        <div class="col-sm-12 margin-top-xs hidden" id="vi-template-alert-box">
+                            <div class="alert alert-danger alert-dismissibl fade in" style="margin-bottom: 0px;">
+                                <button type="button" class="close" onclick="hideVITemplateAlert(this);">
+                                    <span aria-hidden="true">&times;</span>
+                                    <span class="sr-only"><?php echo trans('company.close'); ?></span>
+                                </button>
+                                <p id="p-vi-template-warnning"><?php echo trans('company.msg_39'); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo trans('company.close'); ?></button>
+                <button type="button" class="btn btn-primary" onclick="saveVITemplate(this);"><?php echo trans('company.save'); ?></button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- EOF for Add Template -->
+
+
+<!-- Modal Div for Add Questionnaire -->
+<div class="modal fade" id="questionnaireModal" tabindex="-1" role="dialog" aria-labelledby="msgModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="msgModalLabel"><?php echo trans('company.questionnaire'); ?></h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group ">
+                    <input type="hidden" value="" id="js-input-questionnaire-id">
+                    <div class="row margin-bottom-xs">
+                        <div class="col-sm-2">
+                            <label class="margin-top-xs"><?php echo trans('company.title'); ?>:</label>
+                        </div>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="js-input-questionnaire-title">
+                        </div>
+
+                        <div class="col-sm-12 margin-top-xs hidden" id="questionnaire-title-alert-box">
+                            <div class="alert alert-danger alert-dismissibl fade in" style="margin-bottom: 0px;">
+                                <button type="button" class="close" onclick="hideQuestionnaireTitleAlert(this);">
+                                    <span aria-hidden="true">&times;</span>
+                                    <span class="sr-only"><?php echo trans('company.close'); ?></span>
+                                </button>
+                                <p><?php echo trans('company.msg_39'); ?></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr/>
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <b><?php echo trans('company.selected_questions'); ?>:</b>
+
+                            <div class="col-sm-12 margin-top-xs hidden" id="questionnaire-questions-alert-box">
+                                <div class="alert alert-danger alert-dismissibl fade in" style="margin-bottom: 0px;">
+                                    <button type="button" class="close" onclick="hideQuestionnaireQuestionsAlert(this);">
+                                        <span aria-hidden="true">&times;</span>
+                                        <span class="sr-only"><?php echo trans('company.close'); ?></span>
+                                    </button>
+                                    <p><?php echo trans('company.msg_40'); ?></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="margin-top-xs" id="questions_box">
+
+                        </div>
+                    </div>
+
+                    <hr/>
+
+                    <div class="portlet box grey-cascade">
+                        <div class="portlet-title">
+                            <div class="caption">
+                                <i class="fa fa-globe"></i><?php echo trans('company.select_questions'); ?>
+
+                            </div>
+                            <div class="tools">
+                                <a href="javascript:;" class="collapse">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="portlet-body" id="select_questions_table_box">
+                            <table class="table table-striped table-bordered table-hover" id="select_questions_table">
+                                <thead>
+                                    <tr>
+                                        <th class="table-checkbox">
+                                            <input type="checkbox" class="group-checkable" data-set="#select_questions_table input.checkboxes"/>
+                                        </th>
+                                        <th>
+                                            <?php echo trans('company.question'); ?>
+
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach($questions as $key => $value): ?>
+                                    <tr class="odd gradeX">
+                                        <td>
+                                            <input type="checkbox" class="checkboxes" value="<?php echo $value->id; ?>">
+                                        </td>
+                                        <td>
+                                            <?php echo $value->question; ?>
+
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo trans('company.close'); ?></button>
+                <button type="button" class="btn btn-primary" onclick="saveQuestionnaire(this);"><?php echo trans('company.save'); ?></button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Div for Add Questionnaire -->
+
+<!-- Model Div for Questions -->
+<div id="clone_div_questions" class="row hidden">
+    <div class="col-sm-10 col-sm-offset-1 margin-top-xs">
+        <p id="js_p_question" style="margin-bottom: 0px;"></p>
+    </div>
+</div>
+<!-- End Div for Questions -->
+
+<!-- Model Div for Service -->
+<div id="clone_div_service" class="hidden"> 
+	<input type="hidden" name="service_id[]" value="" id="service_id">
+	<div class="form-group" style="margin-bottom: 0px;">	
+		<div class="row">
+			<div class="col-sm-6 col-sm-offset-1">
+				<div class="row margin-top-sm">
+					<div class="form-group">
+						<label class="col-sm-4 control-label margin-top-xs"><?php echo trans('company.service_name'); ?>:</label>
+						<div class="col-sm-8">
+							<input class="form-control" type="text" name="service_name[]" id="service_name">
+						</div>				
+					</div>
+				</div>
+			</div>
+			
+			<div class="col-sm-4 padding-left-normal">
+				<div class="row margin-top-sm">
+					<div class="form-group">
+						<label class="col-sm-5 margin-top-xs"> <?php echo trans('company.icon_code'); ?>:</label>
+						<div class="col-sm-7">
+							<input class="form-control" type="text" name="icon_code[]" readonly id="icon_code">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>				                   
+	</div>
+	
+	<div class="form-group" style="margin-bottom: 0px;">
+		<div class="row">
+			<div class="col-sm-2 col-sm-offset-1">
+				<div class="row margin-top-sm" style="padding-left: 15px;">
+					<div class="form-group">
+						<?php echo Form::label('', trans('company.service_description').':', ['class' => 'margin-top-xs']); ?>
+
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-8">
+				<div class="row margin-top-sm" style="padding: 0 15px 0 15px;">
+					<div class="form-group">
+						<textarea class="form-control" name="service_description[]" id="service_description" placeholder="Brief Description..." style="height: 100px;"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-2 col-sm-offset-1">
+			</div>
+		</div>
+	</div> 
+	
+	<div class="form-group">	
+		<div class="row">
+			<div class="col-sm-6 col-sm-offset-1">
+				<div class="row">
+					<div class="form-group">	
+						<div class="col-sm-8 col-sm-offset-4">
+							<a style="color: #2980b9; cursor: pointer;" onclick="onAddService('', '', '', '');"><i class="fa fa-plus-circle"></i> <?php echo trans('company.add_new_service'); ?></a>
+						</div>				
+					</div>
+				</div>
+			</div>
+			
+			<div class="col-sm-4 padding-left-normal">
+				<div class="row">
+					<div class="form-group">
+						<div class="col-sm-7 col-sm-offset-5">
+							<a style="color: #e74c3c; cursor: pointer;" onclick="onDeleteService(this);"><i class="fa fa-trash"></i> <?php echo trans('company.delete_service'); ?></a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>				                   
+	</div>
+	<div class="form-group">
+		<div class="col-sm-10 col-sm-offset-2">
+			<hr/>
+		</div>
+	</div>	
+</div>
+<!--  -->
+
+<?php $__env->stopSection(); ?>
+
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('custom-scripts'); ?>
+    <?php echo HTML::script('/assets/js/bootstrap-colorpicker.js'); ?>
+
+    <?php echo HTML::script('/assets/js/docs.js'); ?>
+
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/select2/select2.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/datatables/media/js/jquery.dataTables.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/datatables/plugins/bootstrap/dataTables.bootstrap.js'); ?>
+
+
+    <?php echo $__env->make('js.company.dashboard.profile', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('company.layout', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>

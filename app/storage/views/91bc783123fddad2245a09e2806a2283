@@ -1,0 +1,823 @@
+    <?php echo HTML::style('/assets/css/star-rating.min.css'); ?>
+
+    <?php echo HTML::script('/assets/js/star-rating.min.js'); ?>
+
+
+    <style>
+        .nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+            color: black;
+        }
+
+    </style>
+
+    <?php  $myNote = ''; ?>
+    <?php if($user->notes()->count() > 0): ?>
+        <?php foreach($user->notes as $note): ?>
+            <?php
+                if ($note->company->id == $company->id) $myNote = $note->notes;
+            ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-6 col-sm-offset-6" id="js-div-user-detail-view">
+                <div class="alert alert-userview alert-dismissable" style="background-color: white; box-shadow: 0 0 8px #989898;">
+                    <button type="button" class="close" onclick="hideUserView()" aria-hidden="true"></button>
+
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <img style="width:100px; height:100px; border: 2px solid #FFF;" src="<?php echo HTTP_PHOTO_PATH.$user->profile_image; ?>">
+                        </div>
+
+                        <div class="col-sm-9">
+                            <p class="ajax-username"><?php echo $user->name; ?> <?php if($user->age($user->id) != 0): ?> <?php echo $user->age($user->id); ?> <?php endif; ?> &nbsp <?php if($user->gender == 0): ?> <i class="fa fa-male"></i> <?php else: ?> <i class="fa fa-female"></i> <?php endif; ?></p>
+                            <p style="margin-bottom: 5px;"><?php echo $user->professional_title; ?></p>
+
+                            <input id="input-rate-<?php echo $user->id; ?>" name="rating" class="rating" data-size="xs" data-default-caption="{rating}" data-star-captions="{}" style="float: left;" value="<?php echo count($user->scores()->where('company_id', $company->id)->get()) > 0 ? $user->scores()->where('company_id', $company->id)->firstOrFail()->score : 0; ?>" readonly>
+
+                            <?php if($user->labelIdsOfAgency($company->id) != ''): ?>
+                                <div class="col-sm-12 margin-top-xs">
+                                    <div class="row">
+                                        <?php foreach($user->labels()->where('company_id', $company->id)->get() as $label): ?>
+                                            <span class="label" style="background-color: <?php echo $label->label->color; ?>; font-size: 11px;"><?php echo $label->label->name; ?></span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="row margin-top-sm">
+                        <div class="col-sm-12">
+                            <div class="tabbable-line">
+                                <ul class="nav nav-tabs">
+                                    <li class="active">
+                                        <a href="#tab_15_1" data-toggle="tab">
+                                        <?php echo trans('user.profile'); ?> </a>
+                                    </li>
+                                    <li class="">
+                                        <a href="#tab_15_2" data-toggle="tab">
+                                        <?php echo trans('user.applied_jobs'); ?> </a>
+                                    </li>
+                                    <li class="">
+                                        <a href="#tab_15_3" data-toggle="tab">
+                                        <?php echo trans('user.notes'); ?> </a>
+                                    </li>
+                                    <?php if($user->viCreated($company->id)->get()->count() > 0): ?>
+                                    <li class="">
+                                        <a href="#tab_15_4" data-toggle="tab">
+                                        <?php echo trans('user.interviews'); ?> </a>
+                                    </li>
+                                    <?php endif; ?>
+                                    <?php if($company->availableJobs($user->id)->count() > 0): ?>
+                                    <li class="">
+                                        <a href="#tab_15_5" data-toggle="tab">
+                                        <?php echo trans('user.invites'); ?>
+
+                                        </a>
+                                    </li>
+                                    <?php endif; ?>
+                                    <li class="">
+                                        <a href="#tab_15_6" data-toggle="tab">
+                                        <?php echo trans('user.messages'); ?>
+
+                                        </a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content">
+                                    <div class="tab-pane active" id="tab_15_1">
+
+                                        <div id="note-box">
+                                            <div class="alert alert-success alert-dismissable" id="js-div-userForm-note-alert" style="display: none;">
+                                                <button type="button" class="close" onclick="hideAlert(this);" aria-hidden="true" ></button>
+                                                Note has been saved successfully.
+                                            </div>
+
+                                            <p>
+                                                <b><?php echo trans('user.company_notes'); ?>:</b>
+                                            </p>
+
+                                            <div class="row margin-bottom-xs">
+                                                <div class="col-sm-12">
+                                                    <textarea style="width: 100%;" rows="5" id="js-textarea-user-note"><?php echo $myNote; ?></textarea>
+                                                </div>
+                                            </div>
+
+                                            <div class="row text-center">
+                                                <button type="button" class="btn btn-primary" onclick="saveUserNote(this)" data-userid="<?php echo $user->id; ?>">Save Note</button>
+                                            </div>
+                                        </div>
+
+                                        <p>
+                                            <b><?php echo trans('user.about_me'); ?></b>
+                                        </p>
+                                        <p>
+                                             <?php echo nl2br($user->about); ?>
+
+                                        </p>
+
+                                        <div class="panel-group accordion margin-top-normal" id="accordion2">
+                                            <?php if($user->experiences()->count() > 0): ?>
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+                                                    <h4 class="panel-title">
+                                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapse_2_4">
+                                                    <?php echo trans('user.work_experience'); ?> </a>
+                                                    </h4>
+                                                </div>
+                                                <div id="collapse_2_4" class="panel-collapse collapse" style="height: 0px;">
+                                                    <div class="panel-body">
+                                                        <?php $t = 0;?>
+                                                        <?php foreach($user->experiences as $experience){?>
+                                                        <?php $t ++;?>
+                                                        <div class="row">
+                                                            <div class="col-sm-3 padding-bottom-xs margin-top-sm">
+                                                                <div class="col-sm-12">
+                                                                    <span class="user-view-experiencce-name"><?php echo $experience->name; ?></span>
+                                                                </div>
+                                                                <div class="col-sm-12">
+                                                                    <span class="user-view-experience-position"><?php echo $experience->position; ?></span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-sm-4 padding-bottom-xs margin-top-sm">
+                                                                <div class="row">
+                                                                    <div class="col-sm-2">
+                                                                        <div class="user-view-experience-circle-mark"></div>
+                                                                    </div>
+                                                                    <div class="col-sm-9">
+                                                                        <div class="row">
+                                                                            <span class="user-view-bold-text"><?php echo $experience->start.' - '.$experience->end; ?></span>
+                                                                        </div>
+                                                                        <div class="row">
+                                                                            <span style="color: #16a085;"><?php echo $experience->type->name; ?></span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-sm-12">
+                                                                <span class="margin-top-sm user-view-text"><?php echo $experience->notes; ?></span>
+                                                            </div>
+                                                        </div>
+
+                                                        <?php if (count($user->experiences) != $t) {?>
+                                                        <div class="row">
+                                                            <div class="col-sm-3">
+                                                                <div class="col-sm-12">
+                                                                    <hr style="border-top: 1px solid #16a085;"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-6 col-sm-offset-3">
+                                                                <div class="col-sm-12">
+                                                                    <hr/>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <?php }?>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <?php endif; ?>
+
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+                                                    <h4 class="panel-title">
+                                                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapse_2_1">
+                                                    <?php echo trans('user.skills'); ?> </a>
+                                                    </h4>
+                                                </div>
+                                                <div id="collapse_2_1" class="panel-collapse collapse" style="">
+                                                    <div class="panel-body">
+                                                        <?php foreach ($user->skills as $skill) {?>
+                                                        <div class="row">
+                                                            <div class="col-sm-6">
+                                                                <span class="user-view-small-title text-uppercase" style="color: #999999;"><?php echo $skill->name; ?></span>
+                                                            </div>
+                                                            <div class="col-sm-6" style="margin-top: 2px;">
+                                                                <span class="user-view-text" style="color: #999999;"><?php echo $skill->value.' '. trans('user.years'); ?> </span>
+                                                            </div>
+                                                        </div>
+                                                        <?php }?>
+
+                                                        <div class="row">
+                                                            <div class="col-sm-12">
+                                                                <hr/>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row">
+                                                            <div class="col-sm-6">
+                                                                <span class="user-view-small-title text-uppercase"><?php echo count($user->languages)+1; ?> <?php echo trans('user.languages'); ?></span>
+                                                            </div>
+                                                            <div class="col-sm-6">
+                                                                <span class="text-uppercase" style="color: #666666;"><?php echo $user->language->name; ?></span><span class="text-uppercase" style="color: #cccccc;"> (<?php echo trans('user.native'); ?>)</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <?php foreach($user->languages as $language) {?>
+                                                            <div class="row margin-top-xs">
+                                                                <div class="col-sm-12">
+                                                                    <span class="text-uppercase user-view-bold-text"><?php echo $language->language->name; ?></span>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row margin-top-xs">
+                                                                <div class="col-sm-6">
+                                                                    <span class="user-view-text"><?php echo trans('user.understanding'); ?></span>
+                                                                </div>
+                                                                <div class="col-sm-6">
+                                                                    <img src="<?php echo HTTP_IMAGE_PATH.'mark'.$language->understanding.'.png'; ?>">
+                                                                </div>
+                                                            </div>
+                                                            <div class="row margin-top-xs">
+                                                                <div class="col-sm-6">
+                                                                    <span class="user-view-text"><?php echo trans('user.speaking'); ?></span>
+                                                                </div>
+                                                                <div class="col-sm-6">
+                                                                    <img src="<?php echo HTTP_IMAGE_PATH.'mark'.$language->speaking.'.png'; ?>">
+                                                                </div>
+                                                            </div>
+                                                            <div class="row margin-top-xs">
+                                                                <div class="col-sm-6">
+                                                                    <span class="user-view-text"><?php echo trans('user.writing'); ?></span>
+                                                                </div>
+                                                                <div class="col-sm-6">
+                                                                    <img src="<?php echo HTTP_IMAGE_PATH.'mark'.$language->writing.'.png'; ?>">
+                                                                </div>
+                                                            </div>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <?php if($user->hobbies != ''): ?>
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+                                                    <h4 class="panel-title">
+                                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapse_2_2">
+                                                    <?php echo trans('user.hobbies'); ?> </a>
+                                                    </h4>
+                                                </div>
+                                                <div id="collapse_2_2" class="panel-collapse collapse" style="height: 0px;">
+                                                    <div class="panel-body">
+                                                        <div class="col-sm-12 text-center">
+                                                            <?php
+                                                                $hobbies = explode(',', str_replace(' ', '', $user->hobbies));
+                                                                foreach($hobbies as $hobby) {
+                                                            ?>
+                                                                <span class="user-view-bold-text user-view-hobby"><?php echo $hobby; ?></span>
+                                                            <?php }?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <?php endif; ?>
+                                            <?php if($user->educations()->count() > 0 || $user->awards()->count() > 0): ?>
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+                                                    <h4 class="panel-title">
+                                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapse_2_3">
+                                                    <?php if($user->educations->count() > 0): ?><?php echo trans('user.education'); ?>, <?php endif; ?> <?php if($user->awards()->count() > 0): ?><?php echo trans('user.awards_honors'); ?><?php endif; ?></a>
+                                                    </h4>
+                                                </div>
+                                                <div id="collapse_2_3" class="panel-collapse collapse" style="height: 0px;">
+                                                    <div class="panel-body">
+                                                        <?php if($user->educations()->count() > 0): ?>
+                                                        <div class="col-sm-12 margin-bottom-normal">
+                                                            <div class="col-sm-12 text-center">
+                                                                <span class="user-view-field-title"><i class="fa fa-bank"></i> <?php echo trans('user.education'); ?></span>
+                                                            </div>
+                                                            <div class="col-sm-12 text-center margin-top-xs margin-bottom-normal">
+                                                                <span class="user-view-field-description"><?php echo trans('user.text_04'); ?></span>
+                                                            </div>
+
+                                                            <?php foreach($user->educations as $education) {?>
+                                                            <div class="col-sm-12 text-center">
+                                                                <div class="user-view-education-background">
+                                                                    <div class="col-sm-12 text-center" style="margin-top: 23px;">
+                                                                        <span style="color: white; font-weight: bold;"><?php echo $education->start; ?></span>
+                                                                    </div>
+                                                                    <div class="col-sm-12 text-center">
+                                                                        <span style="color: white; font-weight: bold;">-</span>
+                                                                    </div>
+                                                                    <div class="col-sm-12 text-center">
+                                                                        <span style="color: white; font-weight: bold;"><?php echo $education->end; ?></span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-sm-6" style="border-right: 1px solid #16a085; height: 10px;"></div>
+                                                            </div>
+
+                                                            <div class="row margin-top-xs">
+                                                                <div class="col-sm-12 text-center">
+                                                                    <span class="user-view-bold-text" style="font-size: 17px;"><?php echo $education->name; ?></span>
+                                                                </div>
+                                                                <div class="col-sm=12 text-center">
+                                                                    <span class="user-view-text-small"><?php echo $education->faculty; ?></span>
+                                                                </div>
+                                                                <div class="col-sm=12 text-center">
+                                                                    <span class="user-view-text-small"><i class="fa fa-map-marker"></i> <?php echo $education->location; ?></span>
+                                                                </div>
+
+                                                                <div class="col-sm-12 text-center margin-top-xs">
+                                                                    <span class="user-view-text"><?php echo $education->notes; ?></span>
+                                                                </div>
+                                                            </div>
+                                                            <?php }?>
+                                                        </div>
+                                                        <?php endif; ?>
+
+                                                        <?php if($user->awards()->count() > 0): ?>
+                                                        <div class="col-sm-12" style="background-color: white;">
+                                                            <div class="col-sm-12 text-center">
+                                                                <span class="user-view-field-title"><i class="fa fa-trophy"></i> <?php echo trans('user.awards_honors'); ?></span>
+                                                            </div>
+                                                            <div class="col-sm-12 margin-bottom-sm">
+                                                                <hr/>
+                                                            </div>
+
+                                                            <?php foreach($user->awards as $award) {?>
+                                                            <div class="col-sm-12 text-center">
+                                                                <div class="user-view-award-background">
+                                                                    <div class="col-sm-12 text-center" style="margin-top: 21px;">
+                                                                        <span style="color: white; font-weight: bold; font-size: 25px;"><i class="fa fa-trophy"></i></span>
+                                                                    </div>
+                                                                    <div class="col-sm-12 text-center">
+                                                                        <span style="color: white; font-weight: bold;"><?php echo $award->year; ?></span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-sm-6" style="border-right: 1px solid #e74c3c; height: 10px;"></div>
+                                                            </div>
+
+                                                            <div class="row margin-top-xs">
+                                                                <div class="col-sm-12 text-center">
+                                                                    <span class="user-view-bold-text" style="font-size: 17px;"><?php echo $award->name; ?></span>
+                                                                </div>
+                                                                <div class="col-sm=12 text-center">
+                                                                    <span class="user-view-text-small"><?php echo $award->prize; ?></span>
+                                                                </div>
+                                                                <div class="col-sm=12 text-center">
+                                                                    <span class="user-view-text-small"><i class="fa fa-map-marker"></i> <?php echo $award->location; ?></span>
+                                                                </div>
+                                                            </div>
+                                                            <?php }?>
+                                                        </div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <?php endif; ?>
+                                            <?php if($user->testimonials()->count() > 0): ?>
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+                                                    <h4 class="panel-title">
+                                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapse_2_5">
+                                                    <?php echo trans('user.testimonials'); ?> </a>
+                                                    </h4>
+                                                </div>
+                                                <div id="collapse_2_5" class="panel-collapse collapse" style="height: 0px;">
+                                                    <div class="panel-body">
+                                                        <?php foreach($user->testimonials as $testimonial) {?>
+                                                        <div class="row">
+                                                            <div class="col-sm-12 text-center">
+                                                                <div class="user-view-testimonial-profile">
+                                                                    <div class="col-sm-12" style="margin-top: 40px;">
+                                                                        <span style="color: #cccccc; font-size: 35px;"><i class="fa fa-quote-right"></i></span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-sm-12 margin-top-xs text-center">
+                                                                <span class="user-view-text"> <?php echo $testimonial->notes; ?></span>
+                                                            </div>
+                                                            <div class="col-sm-12 margin-top-xs text-center">
+                                                                <span class="user-view-field-description"> <?php echo $testimonial->name; ?></span>
+                                                            </div>
+                                                        </div>
+                                                        <?php }?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <?php endif; ?>
+                                            <div class="panel panel-default">
+                                                <div class="panel-heading">
+                                                    <h4 class="panel-title">
+                                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion2" href="#collapse_2_6">
+                                                    <?php echo trans('user.contact_detail'); ?> </a>
+                                                    </h4>
+                                                </div>
+                                                <div id="collapse_2_6" class="panel-collapse collapse" style="height: 0px;">
+                                                    <div class="panel-body">
+                                                        <div class="col-sm-6">
+                                                            <div class="row">
+                                                                <div class="col-sm-2">
+                                                                    <span style="color:#16a085;"><i class="fa fa-map-marker"></i></span>
+                                                                </div>
+                                                                <div class="col-sm-10">
+                                                                    <span style="color: #666666"><?php echo $user->address; ?></span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="row margin-top-sm">
+                                                                <div class="col-sm-2">
+                                                                    <span style="color:#16a085;"><i class="fa fa-mobile-phone"></i></span>
+                                                                </div>
+                                                                <div class="col-sm-10">
+                                                                    <span style="color: #666666"><?php echo $user->phone; ?></span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="row margin-top-sm">
+                                                                <div class="col-sm-2">
+                                                                    <span style="color:#16a085;"><i class="fa fa-envelope-o"></i></span>
+                                                                </div>
+                                                                <div class="col-sm-10">
+                                                                    <span style="color: #666666">
+                                                                        <?php if($user->is_published): ?>
+                                                                            <?php echo $user->email; ?>
+
+                                                                        <?php else: ?>
+                                                                            <i class="fa fa-warning"></i> <?php echo trans('user.msg_30'); ?>
+
+                                                                        <?php endif; ?>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="row margin-top-sm">
+                                                                <div class="col-sm-2">
+                                                                    <span style="color:#16a085;"><i class="fa fa-gears"></i></span>
+                                                                </div>
+                                                                <div class="col-sm-10">
+                                                                    <span style="color: #009cff"><?php echo $user->website; ?></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-sm-6">
+                                                            <div class="row">
+                                                                <div class="col-sm-2">
+                                                                    <span style="color:#16a085;"><i class="fa fa-facebook-square"></i></span>
+                                                                </div>
+                                                                <div class="col-sm-10">
+                                                                    <span style="color: #009cff"><a><?php echo trans('user.facebook'); ?></a></span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="row margin-top-sm">
+                                                                <div class="col-sm-2">
+                                                                    <span style="color:#16a085;"><i class="fa fa-linkedin-square"></i></span>
+                                                                </div>
+                                                                <div class="col-sm-10">
+                                                                    <span style="color: #009cff"><a><?php echo trans('user.linkedin'); ?></a></span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="row margin-top-sm">
+                                                                <div class="col-sm-2">
+                                                                    <span style="color:#16a085;"><i class="fa fa-twitter-square"></i></span>
+                                                                </div>
+                                                                <div class="col-sm-10">
+                                                                    <span style="color: #009cff"><a><?php echo trans('user.twitter'); ?></a></span>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="row margin-top-sm">
+                                                                <div class="col-sm-2">
+                                                                    <span style="color:#16a085;"><i class="fa fa-google-plus-square"></i></span>
+                                                                </div>
+                                                                <div class="col-sm-10">
+                                                                    <span style="color: #009cff"><a><?php echo trans('user.google'); ?>+</a></span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-pane" id="tab_15_2">
+                                        <?php foreach($user->applies as $apply): ?>
+                                            <?php if($apply->job->company_id == $company->id): ?>
+                                                <div class="row">
+                                                    <div class="col-sm-12">
+                                                        <p>
+                                                            <a href="<?php echo URL::route('company.job.view', $apply->job->slug); ?>"><?php echo $apply->job->name; ?></a>
+                                                        </p>
+
+                                                        <p>
+                                                            <span style="float: left; margin-top: 9px; margin-right: 10px;">Apply Rating:</span>
+                                                            <input  name="rating" class="rating" data-size="xs" data-default-caption="{rating}" data-star-captions="{}" value="<?php echo $apply->score; ?>" style="float: left;" readonly>
+                                                        </p>
+                                                        <?php if($apply->notes()->count() > 0): ?>
+                                                        <p>
+                                                            <span style="float: left; margin-right: 10px;">Apply Note:</span>
+                                                            <div style="float: left;">
+                                                                <?php foreach($apply->notes as $note): ?>
+                                                                    <?php if($note->company_id != $company->id): ?>
+                                                                        <p><?php echo nl2br($note->notes); ?> (by <?php echo $note->company->name; ?>)</p>
+                                                                    <?php else: ?>
+                                                                        <p><?php echo nl2br($note->notes); ?> (by me)</p>
+                                                                    <?php endif; ?>
+                                                                    <hr/>
+                                                                <?php endforeach; ?>
+                                                            </div>
+                                                        </p>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <div class="tab-pane" id="tab_15_3">
+
+                                        <div id="note-box">
+                                            <div class="alert alert-success alert-dismissable" id="js-div-userForm-note-alert" style="display: none;">
+                                                <button type="button" class="close" onclick="hideAlert(this);" aria-hidden="true" ></button>
+                                                Note has been saved successfully.
+                                            </div>
+
+                                            <p>
+                                                <b><?php echo trans('user.company_notes'); ?>:</b>
+                                            </p>
+
+                                            <div class="row margin-bottom-xs">
+                                                <div class="col-sm-12">
+                                                    <textarea style="width: 100%;" rows="5" id="js-textarea-user-note"><?php echo $myNote; ?></textarea>
+                                                </div>
+                                            </div>
+
+                                            <div class="row text-center margin-bottom-xs">
+                                                <button type="button" class="btn btn-primary" onclick="saveUserNote(this)" data-userid="<?php echo $user->id; ?>">Save Note</button>
+                                            </div>
+
+                                            <?php foreach($user->notes as $note): ?>
+                                                <?php
+                                                    if ($note->company->id == $company->id) $myNote = $note->notes;
+                                                ?>
+                                                <?php if($note->company_id != $company->id): ?>
+                                                <div class="alert alert-success">
+                                                    <div class="row">
+                                                        <div class="col-sm-3">
+                                                            <strong><?php echo $note->company->name; ?></strong>
+                                                        </div>
+                                                        <div class="col-sm-9">
+                                                            <?php echo nl2br($note->notes); ?>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        </div>
+
+                                        <hr/>
+
+                                        <p>
+                                            <b><?php echo trans('user.apply_notes'); ?>:</b>
+                                        </p>
+                                        <?php foreach($user->applies as $apply): ?>
+                                            <?php if($apply->job->company_id == $company->id || $apply->job->sharedToCompany($company->id)): ?>
+                                            <?php foreach($apply->notes as $note): ?>
+                                                <div class="alert alert-info">
+                                                    <div class="row">
+                                                        <div class="col-sm-3">
+                                                            <?php echo trans('user.job_name'); ?>
+
+                                                        </div>
+                                                        <div class="col-sm-9">
+                                                            <strong><?php echo $note->apply->job->name; ?></strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row margin-top-xs">
+                                                        <div class="col-sm-3">
+                                                            <?php echo trans('user.notes'); ?>
+
+                                                        </div>
+                                                        <div class="col-sm-9">
+                                                            <p><?php echo nl2br($note->notes); ?> (by <strong><?php echo $note->company->name; ?></strong>)</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+
+                                        <hr/>
+
+                                        <p>
+                                            <b>Interview Notes:</b>
+                                        </p>
+                                        <?php foreach($user->viCreated($company->id)->get() as $viCreated): ?>
+                                            <?php if($viCreated->responses()->count() > 0 && $viCreated->hasNotes()): ?>
+                                                <div class="alert alert-warning">
+                                                    <div class="row">
+                                                        <div class="col-sm-3">
+                                                            Interview title:
+                                                        </div>
+                                                        <div class="col-sm-9">
+                                                            <strong><?php echo $viCreated->questionnaire->title; ?></strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row margin-top-xs">
+                                                        <div class="col-sm-3">
+                                                            Questions & Notes:
+                                                        </div>
+                                                        <div class="col-sm-9">
+                                                            <?php foreach($viCreated->responses as $key => $value): ?>
+                                                                <p><strong><?php echo $value->question->question; ?></strong></p>
+                                                                <?php foreach($value->notes as $note): ?>
+                                                                    <p><?php echo nl2br($note->notes); ?> (by <?php if($note->company->id != $company->id): ?><?php echo $note->company->name; ?> <?php else: ?> me <?php endif; ?>)</p>
+                                                                <?php endforeach; ?>
+                                                                <hr/>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <div class="tab-pane" id="tab_15_4">
+                                        <?php foreach($user->viCreated($company->id)->get() as $viCreated): ?>
+                                            <?php if($viCreated->responses()->count() > 0): ?>
+                                                <div class="portlet box blue">
+                                                    <div class="portlet-title">
+                                                        <div class="caption">
+                                                            <?php echo $viCreated->questionnaire->title; ?>
+
+                                                        </div>
+                                                        <div class="tools">
+                                                            <a href="javascript:;" class="collapse">
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                    <div class="portlet-body">
+                                                        <ul class="nav nav-tabs">
+                                                            <?php foreach($viCreated->responses as $key => $value): ?>
+                                                            <li class="<?php if($key == 0): ?> active <?php endif; ?>">
+                                                                <a href="#tab_<?php echo $value->id; ?><?php echo $value->id; ?>_<?php echo $key + 1; ?>" data-toggle="tab">
+                                                                <?php echo trans('user.question').' '.($key + 1); ?> </a>
+                                                            </li>
+                                                            <?php endforeach; ?>
+                                                        </ul>
+                                                        <div class="tab-content">
+                                                            <?php foreach($viCreated->responses as $key => $value): ?>
+                                                            <div class="tab-pane <?php if($key == 0): ?> active <?php endif; ?>" id="tab_<?php echo $value->id; ?><?php echo $value->id; ?>_<?php echo $key + 1; ?>">
+                                                                <div class="row">
+                                                                    <div class="col-sm-6">
+                                                                        <video id="preview" controls style="width: 100%;">
+                                                                            <source src="<?php echo HTTP_VIDEO_PATH.$value->file_name; ?>" type="video/webm">
+                                                                        </video>
+                                                                    </div>
+                                                                    <div class="col-sm-6">
+                                                                        <p style="color: #A39D9D;">Interview Questions</p>
+                                                                        <p class="p-interview-question"><?php echo $value->question->question; ?></p>
+
+                                                                        <hr/>
+                                                                        <div class="row margin-top-xs">
+                                                                            <div class="col-sm-12">
+                                                                                <span class="span-job-description-title">My Note:</span>
+                                                                            </div>
+
+                                                                            <?php
+                                                                                $myNotes = '';
+                                                                                if ($value->notes()->where('company_id', $company->id)->get()->count() > 0) {
+                                                                                    $myNotes = $value->notes()->where('company_id', $company->id)->firstOrFail()->notes;
+                                                                                }
+                                                                            ?>
+                                                                            <div class="col-sm-12 margin-top-xs">
+                                                                                <?php echo nl2br($myNotes); ?>
+
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <div class="tab-pane" id="tab_15_5">
+                                        <?php foreach($company->availableJobs($user->id) as $item): ?>
+                                            <div class="row margin-bottom-xs">
+                                                <div class="col-sm-9 padding-top-xs">
+                                                    <?php echo $item->name; ?>
+
+                                                </div>
+
+                                                <div class="col-sm-3">
+                                                    <button type="button" class="btn btn-circle btn-primary" onclick="sendInvite(this)" data-jobId="<?php echo $item->id; ?>" data-userId="<?php echo $user->id; ?>">Invite</button>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <div class="tab-pane" id="tab_15_6">
+                                        <div class="row">
+                                            <div class="col-sm-12">
+                                                <textarea class="form-control" rows="5" id="js_user_txt_message" placeholder="Please enter message here..."></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="row margin-top-xs margin-bottom-xs">
+                                            <div class="col-sm-12 text-right">
+                                                <button type="button" class="btn btn-primary" onclick="sendUserMessage(this)" data-userid="<?php echo $user->id; ?>">Send</button>
+                                            </div>
+                                        </div>
+                                        <hr/>
+                                        <div id="user-message-container">
+                                            <?php foreach($messages as $key => $value): ?>
+                                            <div class="row margin-top-sm">
+                                                <?php if($value->is_company_sent): ?>
+                                                <div class="col-sm-2 text-center">
+                                                    <img src="<?php echo HTTP_LOGO_PATH.$value->company->logo; ?>" style="width: 50%;"/>
+                                                    <div class="margin-top-xs"><?php echo $value->company->name; ?></div>
+                                                </div>
+                                                <div class="col-sm-10">
+                                                    <p>
+                                                        <?php echo $value->description; ?>
+
+                                                        <span class="color-gray-dark font-size-xs">
+                                                            <i>( <?php echo $value->created_at; ?> )</i>
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                <?php else: ?>
+                                                <div class="col-sm-10 text-right">
+                                                    <p><?php echo $value->description; ?></p>
+                                                    <span class="color-gray-dark font-size-xs">
+                                                        <i>( <?php echo $value->created_at; ?> )</i>
+                                                    </span>
+                                                </div>
+                                                <div class="col-sm-2 text-center">
+                                                    <img src="<?php echo HTTP_PHOTO_PATH.$value->user->profile_image; ?>" style="width: 50%;" class="img-rounded"/>
+                                                    <div class="margin-top-xs">
+                                                        <a href="<?php echo URL::route('user.view', $value->user->slug); ?>">
+                                                            <?php echo $value->user->name; ?>
+
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <?php endif; ?>
+                                            </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        // User Form Functions
+        function saveUserNote(obj) {
+            var userId = $(obj).attr('data-userid');
+            var note = $(obj).parents('div#note-box').eq(0).find('textarea#js-textarea-user-note').eq(0).val();
+
+            $.ajax({
+                url: "<?php echo URL::route('company.user.async.saveNotes'); ?>",
+                dataType : "json",
+                type : "POST",
+                data : {user_id : userId, notes : note},
+                success : function(data) {
+                    $(obj).parents('div#note-box').eq(0).find('div#js-div-userForm-note-alert').eq(0).fadeIn('normal');
+                    $('textarea#js-textarea-user-note').val(note);
+                }
+            });
+        }
+
+        function hideAlert(obj) {
+            $(obj).parents('div').eq(0).fadeOut('normal');
+        }
+
+        function sendUserMessage(obj) {
+            var userId = $(obj).attr('data-userid');
+            var message = $('textarea#js_user_txt_message').val();
+            $(obj).html('<img src="<?php echo HTTP_IMAGE_PATH.'loading.gif'; ?>" style="height: 16px;">');
+            $.ajax({
+                url:"<?php echo URL::route('company.user.async.sendMessage'); ?>",
+                dataType : "json",
+                type : "POST",
+                data : {user_id : userId, message : message},
+                success : function(data){
+                    $(obj).html('Send');
+                    if (data.result == 'success') {
+                        $('div#user-message-container').empty();
+                        $('div#user-message-container').html(data.messageView);
+                    }
+                }
+            });
+        }
+    </script>

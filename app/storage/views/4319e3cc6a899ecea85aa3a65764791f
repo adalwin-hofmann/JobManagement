@@ -1,0 +1,226 @@
+<?php $__env->startSection('styles'); ?>
+	<?php echo HTML::style('/assets/metronic/assets/frontend/layout/css/style.css'); ?>
+
+	<?php echo HTML::style('/assets/metronic/assets/frontend/layout/css/style-responsive.css'); ?>
+
+	<?php echo HTML::style('/assets/metronic/assets/frontend/layout/css/themes/blue.css'); ?>
+
+	<?php echo HTML::style('/assets/metronic/assets/frontend/layout/css/custom.css'); ?>
+
+	
+    <?php echo HTML::style('/assets/metronic/assets/global/plugins/fancybox/source/jquery.fancybox.css'); ?>	
+	
+    <?php echo HTML::style('/assets/metronic/assets/global/plugins/bootstrap-datepicker/css/datepicker3.css'); ?>
+
+	<?php echo HTML::style('/assets/metronic/assets/global/plugins/bootstrap-timepicker/css/bootstrap-timepicker.min.css'); ?>
+
+	
+	<?php echo HTML::style('/assets/css/star-rating.min.css'); ?>
+
+	
+    <?php echo HTML::style('/assets/css/style_user.css'); ?>
+
+    <?php echo HTML::style('/assets/css/style_company.css'); ?>
+
+
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('header'); ?>
+
+    <?php if (!isset($pageNo)) { $pageNo = 0; } ?>
+    <div class="pre-header">
+        <div class="container">
+            <div class="row">
+                <!-- BEGIN TOP BAR LEFT PART -->
+                <div class="col-md-6 col-sm-6 additional-shop-info">
+                    <a class="company-site-logo" href="/"><img src="/assets/img/logo.jpg"/></a>
+                </div>
+                <!-- END TOP BAR LEFT PART -->
+                <!-- BEGIN TOP BAR MENU -->
+                <div class="col-md-6 col-sm-6 additional-nav">
+
+                    <?php if(Session::has('user_id')): ?>
+                        <ul class="nav navbar-nav pull-right" style="margin-left: 20px;">
+                            <li class="setting-menu dropdown dropdown-user">
+                                <a class="dropdown-toggle" dropdown-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+                                    <img class="img-circle" src="<?php echo HTTP_PHOTO_PATH.$user->profile_image; ?>">  <span><b><?php echo $user->name; ?></b></span> <i class="fa fa-angle-down"></i>
+                                </a>
+
+                                <ul class="dropdown-menu">
+                                    <li class="<?php echo ($pageNo == 4) ? 'active' : ''; ?>">
+                                        <a href="<?php echo URL::route('user.dashboard.profile'); ?>">
+                                        <i class="fa fa-user"></i> <?php echo trans('menu.profile'); ?> </a>
+                                    </li>
+                                    <li>
+                                        <a href="<?php echo URL::route('user.auth.doLogout'); ?>">
+                                        <i class="fa fa-key"></i> <?php echo trans('menu.sign_out'); ?> </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    <?php elseif(Session::has('agency_id')): ?>
+                        <ul class="nav navbar-nav pull-right" style="margin-left: 20px;">
+                            <li class="setting-menu dropdown dropdown-user">
+                                <a class="dropdown-toggle" dropdown-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+                                    <img src="<?php echo HTTP_LOGO_PATH.$agency->logo; ?>">  <span><b><?php echo $agency->name; ?></b></span> <i class="fa fa-angle-down"></i>
+                                </a>
+
+                                <ul class="dropdown-menu">
+                                    <?php if(Session::get('agency_is_admin') == 1): ?>
+                                        <li class="<?php echo ($pageNo == 4) ? 'active' : ''; ?>">
+                                            <a href="<?php echo URL::route('agency.profile'); ?>">
+                                            <i class="fa fa-user"></i> <?php echo trans('menu.profile'); ?> </a>
+                                        </li>
+                                    <?php endif; ?>
+                                    <li>
+                                        <a href="<?php echo URL::route('agency.auth.doLogout'); ?>">
+                                        <i class="fa fa-key"></i> <?php echo trans('menu.sign_out'); ?> </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    <?php endif; ?>
+
+                    <ul class="list-unstyled list-inline pull-right" style="margin-top: 13px;">
+                        <li><a class="color-blue <?php echo Session::get('locale') != 'fi' ? 'font-weight-bold' : ''; ?>" href="<?php echo URL::route('language-chooser', 'en'); ?>">English</a></li>
+                        <li><a class="color-blue <?php echo Session::get('locale') != 'en' ? 'font-weight-bold' : ''; ?>" href="<?php echo URL::route('language-chooser', 'fi'); ?>">Finnish</a></li>
+                        <li><a class="color-blue <?php echo Session::get('locale') != 'lv' ? 'font-weight-bold' : ''; ?>" href="<?php echo URL::route('language-chooser', 'lv'); ?>">Latvian</a></li>
+                    </ul>
+                    <i class="fa fa-globe pull-right color-blue" style="margin-top: 13px;"></i>
+                </div>
+                <!-- END TOP BAR MENU -->
+            </div>
+        </div>
+    </div>
+
+    <div class="header">
+        <div class="container">
+			<a href="javascript:void(0);" class="mobi-toggler"><i class="fa fa-bars"></i></a>
+			
+            <div class="header-navigation pull-right font-transform-bitter company-menu-bar">
+                <ul class="nav nav-pills nav-top">
+                    <?php if(Session::has('agency_id')): ?>
+                    	<li class="<?php echo ($pageNo == 3) ? 'active' : ''; ?>"><a href="<?php echo URL::route('agency.dashboard'); ?>"><?php echo trans('menu.dashboard'); ?></a></li>
+                        <li class="setting-menu dropdown dropdown-user pointer <?php echo ($pageNo == 1 || $pageNo == 2) ? 'active' : ''; ?>">
+                            <a class="dropdown-toggle" dropdown-toggle = "dropdown" data-hover="dropdown" data-close-others="true"><?php echo trans('menu.jobs'); ?></a>
+                            <ul class="dropdown-menu">
+                                <li class="<?php echo ($pageNo == 1) ? 'active' : ''; ?>"><a href="<?php echo URL::route('agency.job.add'); ?>"><?php echo trans('menu.post_job'); ?></a></li>
+                                <li class="<?php echo ($pageNo == 2) ? 'active' : ''; ?>"><a href="<?php echo URL::route('agency.job.myjobs' ); ?>"><?php echo trans('menu.my_jobs'); ?></a></li>
+                            </ul>
+                        </li>
+                        <li class="setting-menu dropdown dropdown-user pointer <?php echo ($pageNo == 5 || $pageNo == 6) ? 'active' : ''; ?>">
+                            <a class="dropdown-toggle" dropdown-toggle = "dropdown" data-hover="dropdown" data-close-others="true">People</a>
+                            <ul class="dropdown-menu">
+                                <li class="<?php echo ($pageNo == 5) ? 'active' : ''; ?>"><a href="<?php echo URL::route('agency.user.find' ); ?>"><?php echo trans('menu.find_people'); ?></a></li>
+                                <li class="<?php echo ($pageNo == 6) ? 'active' : ''; ?>"><a href="<?php echo URL::route('agency.user.applied' ); ?>"><?php echo trans('menu.applied_people'); ?></a></li>
+                            </ul>
+                        </li>
+                    	<li class="<?php echo ($pageNo == 7) ? 'active' : ''; ?>"><a href="<?php echo URL::route('agency.message.list' ); ?>"><?php echo trans('menu.messages'); ?></a></li>
+                    	<li class="<?php echo ($pageNo == 8) ? 'active' : ''; ?>"><a href="<?php echo URL::route('agency.user.candidates' ); ?>"><?php echo trans('menu.candidates'); ?></a></li>
+                    	<li class="<?php echo ($pageNo == 9) ? 'active' : ''; ?>"><a href="<?php echo URL::route('agency.share'); ?>"><?php echo trans('menu.share_management'); ?></a></li>
+                    	<li class="<?php echo ($pageNo == 10) ? 'active' : ''; ?>"><a href="<?php echo URL::route('agency.company.index'); ?>"><?php echo trans('menu.companies'); ?></a></li>
+                    <?php else: ?>
+                        <li class="<?php echo ($pageNo == 98) ? 'active' : ''; ?>">
+                        	<a href ="<?php echo URL::route('agency.auth.login'); ?>"><?php echo trans('menu.sign_in'); ?></a>
+                        </li>
+                        <li class="<?php echo ($pageNo == 99) ? 'active' : ''; ?>">
+                        	<a href="<?php echo URL::route('agency.auth.signup'); ?>"><?php echo trans('menu.register'); ?></a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+        </div>
+    </div>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->yieldContent('content'); ?>
+
+<?php $__env->startSection('footer'); ?>
+<div class="footer-container">
+    <div class="container footer-menu">
+        <div class="row color-white">
+            <div class="col-sm-3">
+                <p class="text-uppercase margin-bottom-20"><b><?php echo trans('footer.company_info'); ?></b></p>
+                <ul>
+                    <li><a href="#"><?php echo trans('footer.about_us'); ?></a></li>
+                    <li><a href="#"><?php echo trans('footer.blog'); ?></a></li>
+                    <li><a href="#"><?php echo trans('footer.careers'); ?></a></li>
+                    <li><a href="#"><?php echo trans('footer.terms_of_service'); ?></a></li>
+                    <li><a href="#"><?php echo trans('footer.privacy_policy'); ?></a></li>
+                    <li><a href="#"><?php echo trans('footer.contact_support'); ?></a></li>
+                </ul>
+            </div>
+            <div class="col-sm-3 color-white">
+                <p class="text-uppercase margin-bottom-20 text-uppercase"><b><?php echo trans('footer.how_it_works'); ?></b></p>
+                <ul>
+                    <li><a href="#"><?php echo trans('footer.how_it_works'); ?>?</a></li>
+                    <li><a href="#"><?php echo trans('footer.media_solutions'); ?></a></li>
+                    <li><a href="#"><?php echo trans('footer.partnerships'); ?></a></li>
+                </ul>
+            </div>
+            <div class="col-sm-3 color-white">
+                <p class="text-uppercase margin-bottom-20"><b><?php echo trans('footer.follow_us'); ?></b></p>
+                <ul>
+                    <li><a href="#"><i class="fa fa-facebook" style="width: 18px;"></i>&nbsp;<?php echo trans('footer.facebook'); ?></a></li>
+                    <li><a href="#"><i class="fa fa-twitter" style="width: 18px;"></i>&nbsp;<?php echo trans('footer.twitter'); ?></a></li>
+                    <li><a href="#"><i class="fa fa-google-plus" style="width: 18px;"></i>&nbsp;<?php echo trans('footer.google_plus'); ?></a></li>
+                </ul>            
+            </div>
+            <div class="col-sm-3 color-white">
+                <p class="text-uppercase margin-bottom-20 text-uppercase"><b><?php echo trans('footer.news_letters'); ?></b></p>
+                <input type="text" class="form-control" placeholder="Email"/>
+            </div>
+        </div>
+    </div>
+    <footer class="footer-area">
+        <div class="container">
+            <div class="footer-logo pull-left">
+                <a href="/"><?php echo trans('footer.social_headhunter'); ?></a>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </footer>
+</div>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('scripts'); ?>	
+	<?php echo HTML::script('/assets/metronic/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/frontend/layout/scripts/back-to-top.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/frontend/layout/scripts/layout.js'); ?>
+
+    
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/bootstrap-timepicker/js/bootstrap-timepicker.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/scripts/metronic.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/admin/pages/scripts/components-pickers.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/select2/select2.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/datatables/media/js/jquery.dataTables.min.js'); ?>
+
+    <?php echo HTML::script('/assets/metronic/assets/global/plugins/datatables/plugins/bootstrap/dataTables.bootstrap.js'); ?>
+
+    
+    <?php echo HTML::script('/assets/js/star-rating.min.js'); ?>
+
+        
+    <script type="text/javascript">
+        jQuery(document).ready(function() {
+            Layout.init();
+            Layout.initUniform();
+            Layout.initTwitter();
+            Metronic.init();
+            ComponentsPickers.init();
+        });
+    </script>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('main', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>

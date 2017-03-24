@@ -1,0 +1,426 @@
+<?php $__env->startSection('custom-styles'); ?>
+	<style>
+	    .btn {
+	        font-size: 11px;
+	    }
+	</style>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('body'); ?>
+<main class="bs-docs-masthead gray-container padding-top-xs" role="main" style="min-height: 0px;">
+    <div class="container">
+        <div class="row padding-top-normal padding-bottom-normal" style="background-color: rgba(255, 255, 255, 0.4);">
+            <div class="col-sm-12">
+                <form class="form-horizontal" method="post" action="<?php echo URL::route('company.user.find'); ?>">
+                    <div class="form-group">
+                        <div class="col-sm-3">
+                            <div class="col-sm-11 col-sm-offset-1">
+                                <label class="row">Registered Date</label>
+                                <div class="row">
+                                    <input class="form-control form-control-inline  date-picker" data-date-format="yyyy-mm-dd"  type="text" value="<?php echo $startDate; ?>" name="startDate" id="startDate">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <div class="col-sm-11 col-sm-offset-1">
+                                <label class="row">Skill</label>
+                                <div class="row">
+                                    <input class="form-control form-control-inline typeahead tt-query" type="text" value="<?php echo $skill_name; ?>" name="skill_name">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <div class="col-sm-11 col-sm-offset-1">
+                                <label class="row">Filter By</label>
+                                <div class="row">
+                                    <?php echo Form::select('filter_option'
+                                       , array('0' => 'All', '1' => 'Applied', '2' => 'Matched', '3' => 'Followers')
+                                       , $filter_option
+                                       , array('class' => 'form-control')); ?>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-3  padding-top-sm text-center">
+                            <button class="btn btn-primary btn-home"><i class="glyphicon glyphicon-search"></i>   Search</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+<div class="gray-container">
+    <div class="container" style="min-height: 320px;">
+        <div class="row margin-bottom-sm">
+			<?php foreach($users as $user): ?>
+			<div class="row margin-top-xs" id="div_job">
+				<div class="row table-job-row padding-top-sm padding-bottom-sm" style="position: relative;">
+                    <?php if($user->shares()->count() > 0): ?>
+                        <img src="<?php echo HTTP_IMAGE_PATH.'shared-marker.png'; ?>" class="shared-marker" />
+                    <?php endif; ?>
+                    <div class="col-sm-2 text-center">
+                        <img style="width: 50px; height: 50px;" src="<?php echo HTTP_PHOTO_PATH. $user->profile_image; ?>" class="img-circle">
+                        <div class="col-sm-12 margin-top-xs">
+                            <a onclick="showUserView(this)" data-userId="<?php echo $user->id; ?>" class="username"><?php echo $user->name; ?></a><?php if($user->age($user->id) != 0): ?>, <b><?php echo $user->age($user->id); ?></b> <?php endif; ?>
+                        </div>
+
+                        <div class="col-sm-12 find-people-rating">
+                            <input id="input-rate-<?php echo $user->id; ?>" name="rating" class="rating" data-size="xs" data-default-caption="{rating}" data-star-captions="{}" style="float: left;" value="<?php echo count($user->scores()->where('company_id', $company->id)->get()) > 0 ? $user->scores()->where('company_id', $company->id)->firstOrFail()->score : 0; ?>" onchange="showSaveButton(this)">
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="row">
+                                <a class="btn btn-sm blue" id="js-a-save-rate" data-id="<?php echo $user->id; ?>" style="display: none;" onclick="saveUserScore(this)">Save</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-2 text-center">
+                        <div class="col-sm-12 margin-top-xs">
+                            <?php
+                                $skillFlag = 0;
+                                $skillLength = 0;
+                                foreach($user->skills()->orderBy('value', 'desc')->get() as $skill) {
+                                    $skillLength += strlen($skill->name);
+                                    if ($skillFlag >= 3) {
+                                        break;
+                                    }
+                                    $skillFlag ++;
+                            ?>
+                                <p><?php echo $skill->name; ?> (<?php echo $skill->value; ?>)</p>
+                            <?php }
+                                if ($skillFlag == 3) {
+                            ?>
+                                <p>...</p>
+                            <?php }?>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <div class="row">
+                            <div class="col-sm-12 margin-top-xs">
+                                <?php foreach($user->experiences()->orderBy('start', 'desc')->get() as $item): ?>
+                                    <?php if($item->end == '0' || $item->end == ''): ?>
+                                        <p><?php echo trans('user.current_job'); ?>: <?php echo $item->position; ?>, <?php echo $item->name; ?>, <?php echo $item->start; ?> - <?php echo trans('company.still_working'); ?></p>
+                                    <?php else: ?>
+                                        <p><?php echo trans('user.previous_jobs'); ?>: <?php echo $item->position; ?>, <?php echo $item->name; ?>, <?php echo $item->start; ?> - <?php echo $item->end; ?></p>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </div>
+                            <div class="col-sm-12 margin-top-xs">
+                                <?php foreach($user->educations()->orderBy('start', 'desc')->get() as $item): ?>
+                                    <p><?php echo trans('user.education_studied'); ?>: <?php echo $item->name; ?>, <?php echo $item->start; ?> - <?php echo $item->end; ?></p>
+                                    <?php break;?>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-3">
+                        <div class="row">
+                            <div class="col-sm-12 margin-top-xs company-tooltip" style="position:relative;" data-toggle="tooltip" data-html="true" data-placement="left" data-image-url="<?php echo HTTP_PHOTO_PATH. $user->profile_image; ?>" data-tag="<?php echo $user->name; ?>" data-description="<?php echo nl2br($user->about); ?>">
+                                <?php
+                                    $aboutString = $user->about;
+                                    if (preg_match('/^.{1,300}\b/s', $aboutString, $match))
+                                    {
+                                        if (strlen($aboutString) > 300) {
+                                            $aboutString = $match[0].'...';
+                                        }
+                                    }
+                                ?>
+                                <p><?php echo trans('user.about_me'); ?>: <?php echo $aboutString; ?></p>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-sm-2">
+                        <button class="btn btn-sm btn-primary" onclick="showMsgModal(this)" data-id="<?php echo $user->id; ?>"><i class="fa fa-envelope-o"></i> Send Message</button>
+                        <button class="btn btn-sm green margin-top-xxs" id="js-btn-video-interview" data-name="<?php echo $user->name; ?>"  data-userId="<?php echo $user->id; ?>">
+                            <i class="fa fa-video-camera"></i> Video Interview
+                        </button>
+                        <button class="btn btn-sm green margin-top-xxs" id="js-btn-face-interview" data-name="<?php echo $user->name; ?>"  data-userId="<?php echo $user->id; ?>">
+                            <i class="fa fa-male"></i> Face Interview
+                        </button>
+                    </div>
+				</div>
+			</div>
+
+
+            <!-- Modal Div for Send Message -->
+            <div class="modal fade" id="msgModal<?php echo $user->id; ?>" tabindex="-1" role="dialog" aria-labelledby="msgModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                            <h4 class="modal-title" id="msgModalLabel">Send Message</h4>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group ">
+                                <textarea class="form-control" rows="8" id="txt_message"></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="js-btn-send-message" data-id="<?php echo $user->id; ?>">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Div for Send Message -->
+			<?php endforeach; ?>
+			
+			<?php if (count($users) == 0) {?>
+			<div class="row">
+				<div class="col-sm-12">
+					<div class="col-sm-12 padding-top-sm padding-bottom-sm text-center" style="background-color: white;">
+						There are no peoples.
+					</div>
+				</div>
+			</div>
+			<?php }?>
+
+			<div class="pull-right margin-top-xs"><?php echo $users->links(); ?></div>
+        </div>
+    </div>
+
+
+    <!-- Modal Div for Loading -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="msgModalLabel" aria-hidden="true">
+        <div class="modal-dialog" id="js-div-loading" style="width: 110px;">
+            <div class="modal-content" style="border-radius: 5px !important;">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12 text-center">
+                            <img src="/assets/img/ajax-loader.gif">
+                        </div>
+                        <div class="col-sm-12 margin-top-xs">
+                            <span>Sending...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Div for Send Message -->
+
+
+    <div id="js-div-userview" style="display: none;"></div>
+
+</div>
+
+<!-- Modal Div for Video Interview -->
+<div class="modal fade" id="viModal" tabindex="-1" role="dialog" aria-labelledby="msgModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="msgModalLabel"><?php echo trans('job.send_video_interview'); ?></h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="hidden" id="js-input-vi-userid" value="">
+                    <?php if(count($viTemplates) == 0 || count($questionnaires) == 0): ?>
+                    <div class="row margin-bottom-xs">
+                        <div class="col-sm-12">
+                            <div class="alert alert-danger alert-dismissibl fade in" style="margin-bottom: 0px;">
+                                <button type="button" class="close" onclick="hideQuestionnaireQuestionsAlert(this);">
+                                    <span aria-hidden="true">&times;</span>
+                                    <span class="sr-only"><?php echo trans('company.close'); ?></span>
+                                </button>
+                                <p><?php echo trans('company.msg_41'); ?></p>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <label class="margin-top-xs"><?php echo trans('job.to'); ?></label>
+                        </div>
+                        <div class="col-sm-9">
+                            <label id="js-label-vi-username" class="margin-top-xs"></label>
+                        </div>
+                    </div>
+                    <div class="row margin-top-xs">
+                        <div class="col-sm-3">
+                            <label class="margin-top-xs"> <?php echo trans('job.questionnaire'); ?></label>
+                        </div>
+                        <div class="col-sm-9">
+                            <?php echo Form::select('questionnaire_id'
+                               , $questionnaires->lists('title', 'id')
+                               , null
+                               , array('class' => 'form-control', 'id' => 'js-vi-questionnaire-id')); ?>
+
+                        </div>
+                    </div>
+
+                    <div class="row margin-top-xs">
+                        <div class="col-sm-3">
+                            <label class="margin-top-xs"><?php echo trans('job.expiration_date'); ?></label>
+                        </div>
+                        <div class="col-sm-9">
+                            <div class="input-group date date-picker" data-date-format="yyyy-mm-dd" data-date-viewmode="years" data-date-minviewmode="months">
+                                <input type="text" class="form-control" readonly="" name="vi-expiration" value="<?php echo date("Y-m-d",strtotime("+1 week")); ?>" id="vi-expiration">
+                                <span class="input-group-btn">
+                                <button class="btn default" type="button" style="padding-top: 7px; padding-bottom: 8px;   border: 1px solid rgb(219, 219, 219);"><i class="fa fa-calendar"></i></button>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row margin-top-xs">
+                        <div class="col-sm-3">
+                            <label class="margin-top-xs"><?php echo trans('job.template'); ?></label>
+                        </div>
+                        <div class="col-sm-9">
+                            <?php echo Form::select('vi_template_id'
+                               , $viTemplates->lists('title', 'id')
+                               , null
+                               , array('class' => 'form-control', 'id' => "js-vi-template-id")); ?>
+
+                        </div>
+                    </div>
+
+                    <div class="row margin-top-xs">
+                        <div class="col-sm-3">
+                            <label class="margin-top-xs"><?php echo trans('job.subject'); ?></label>
+                        </div>
+                        <div class="col-sm-9">
+                            <input class="form-control" id="js-vi-template-title" value="<?php if(count($viTemplates) > 0): ?> <?php echo $viTemplates[0]->title; ?> <?php endif; ?>"/>
+                        </div>
+                    </div>
+
+                    <div class="row margin-top-xs">
+                        <div class="col-sm-12">
+                            <textarea class="form-control" id="js-vi-template-description"><?php if(count($viTemplates) > 0): ?><?php echo $viTemplates[0]->description; ?><?php endif; ?></textarea>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo trans('job.cancel'); ?></button>
+                <button type="button" class="btn btn-primary <?php if(count($viTemplates) == 0 || count($questionnaires) == 0): ?> disabled <?php endif; ?>" onclick="sendVIInterview(this);"><?php echo trans('job.send'); ?></button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Div for Video Interview -->
+
+<!-- Modal Div for Face Interview -->
+<div class="modal fade" id="fiModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="msgModalLabel">Send Face To Face Interview</h4>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-sm-4 col-sm-offset-2">
+                            <button id="js-btn-schedule" class="btn btn-primary btn-block">Schedule</button>
+                        </div>
+                        <div class="col-sm-4">
+                            <button id="js-btn-invite" class="btn btn-default btn-block">Invite</button>
+                        </div>
+                    </div>
+                    
+                    <div class="margin-top-sm" id="js-div-schedule">
+                        <div class="row">
+                            <div class="col-sm-3 text-right">
+                                <label class="form-control-static">
+                                    Date & Time
+                                </label>
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control text-center readonly" id="js-text-schedule-date" readonly/>
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="text" class="form-control text-center" id="js-text-schedule-time" maxlength="2"/>
+                            </div>
+                            <div class="col-sm-3">
+                                <select class="form-control" id="js-select-schedule-duration">
+                                    <?php $durations = [15, 30, 45, 60, 75, 90, 105, 120, 150, 180, 210, ];?>
+                                    <?php foreach($durations as $value): ?>
+                                        <option value="<?php echo $value; ?>"> <?php echo $value; ?> Min</option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row margin-top-xs">
+                            <div class="col-sm-2 text-right">
+                                <label class="form-control-static">
+                                    Title
+                                </label>
+                            </div>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="js-text-schedule-title"/>
+                            </div>
+                        </div>
+                        
+                        <div class="row margin-top-xs">
+                            <div class="col-sm-2 text-right">
+                                <label class="form-control-static">
+                                    Description
+                                </label>
+                            </div>
+                            <div class="col-sm-10">
+                                <textarea class="form-control" rows="9" id="js-text-schedule-description"></textarea>
+                            </div>
+                        </div>                        
+                    </div>
+                    
+                    <div class="margin-top-sm" id="js-div-invite" style="display: none;">
+                        <div class="row">
+                            <div class="col-sm-2 text-right">
+                                <label class="form-control-static">
+                                    Title
+                                </label>
+                            </div>
+                            <div class="col-sm-7">
+                                <input type="text" class="form-control" id="js-text-invite-title"/>
+                            </div>
+                            <div class="col-sm-3">
+                                <select class="form-control" id="js-select-invite-duration">
+                                    <?php foreach($durations as $value): ?>
+                                        <option value="<?php echo $value; ?>"> <?php echo $value; ?> Min</option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="row margin-top-xs">
+                            <div class="col-sm-2 text-right">
+                                <label class="form-control-static">
+                                    Description
+                                </label>
+                            </div>
+                            <div class="col-sm-10">
+                                <textarea class="form-control" rows="9" id="js-text-invite-description"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="sendFIInterview(this);">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- End Div for Face Interview -->
+
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('custom-scripts'); ?>
+	<?php echo HTML::script('/assets/js/typeahead.min.js'); ?>
+
+	<?php echo $__env->make('js.company.user.find', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('company.layout', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>

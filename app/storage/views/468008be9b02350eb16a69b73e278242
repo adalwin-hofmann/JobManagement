@@ -1,0 +1,66 @@
+<ul class="nav nav-tabs interview-nav-tabs">
+    <?php foreach($interview->questionnaire->questions as $key => $value): ?>
+        <li <?php if($key == 0): ?> class="active" <?php endif; ?> id="li-tab-<?php echo $key; ?>"><a href="#tab-<?php echo $interview->id; ?>-<?php echo $key + 1; ?>" data-toggle="tab"><?php echo trans('company.question').' '.($key+1); ?></a></li>
+    <?php endforeach; ?>
+</ul>
+
+<div class="tab-content">
+    <?php foreach($interview->questionnaire->questions as $key => $value): ?>
+        <div class="tab-pane row fade interview-question-tab <?php if($key == 0): ?> in active <?php endif; ?>" id="tab-<?php echo $interview->id; ?>-<?php echo $key+1; ?>">
+            <div class="row">
+                <div class="col-sm-7">
+                    <video id="preview" controls class="video-interview-preview">
+                        <source src="<?php echo HTTP_VIDEO_PATH.$interview->responses[$key]->file_name; ?>" type="video/webm">
+                    </video>
+                </div>
+                <div class="col-sm-5">
+                    <p style="color: #A39D9D;">Interview Questions</p>
+                    <p class="p-interview-question"><?php echo $value->questions->question; ?></p>
+
+                    <hr/>
+                    <div class="row margin-top-xs">
+                        <div class="col-sm-12">
+                            <span class="span-job-description-title">My Note</span>
+                        </div>
+
+                        <?php
+                            $myNotes = '';
+                            if ($interview->responses[$key]->notes()->where('company_id', $company->id)->get()->count() > 0) {
+                                $myNotes = $interview->responses[$key]->notes()->where('company_id', $company->id)->firstOrFail()->notes;
+                            }
+                        ?>
+                        <div class="col-sm-12">
+                            <textarea class="form-control" id="js-textarea-interview-notes-<?php echo $interview->responses[$key]->id; ?>" rows="5"><?php echo $myNotes; ?></textarea>
+                        </div>
+
+                        <div class="col-sm-12 margin-top-xs text-right">
+                            <button class="btn btn-success btn-sm btn-home" data-id="<?php echo $interview->responses[$key]->id; ?>" onclick="saveInterviewNotes(this)"><i class="fa fa-save"></i> Save Note</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <?php endforeach; ?>
+</div>
+
+
+<script type="text/javascript">
+    function saveInterviewNotes(obj) {
+        var cvrId = $(obj).attr('data-id');
+        var target = 'textarea#js-textarea-interview-notes-'+cvrId;
+        var notes = $(target).val();
+
+        $.ajax({
+            url: "<?php echo URL::route('company.job.async.saveInterviewNote'); ?>",
+            dataType : "json",
+            type : "POST",
+            data : {cvr_id : cvrId, notes : notes},
+            success : function(data) {
+                bootbox.alert(data.msg);
+                window.setTimeout(function(){
+                    bootbox.hideAll();
+                }, 1000);
+            }
+        });
+    }
+</script>

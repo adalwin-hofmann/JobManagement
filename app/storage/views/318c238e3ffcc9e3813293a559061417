@@ -1,0 +1,177 @@
+<?php 
+	$rating = round($company->reviews()->avg('score'));
+
+	$bid_flag = array();
+	$cart_flag = array();
+	
+	foreach ($company->jobs()->get() as $job) {
+		$bid_flag[$job->id] = 0;
+		$cart_flag[$job->id] = 0;
+	}
+	
+	if (isset($user)) {
+		foreach ($user->applies as $apply) {
+			$bid_flag[$apply->job_id] = 1;
+		}
+	
+		foreach ($user->carts as $cart) {
+			$cart_flag[$cart->job_id] = 1;
+		}
+	}
+?>
+
+
+
+<?php $__env->startSection('body'); ?>
+<div class="container">
+    <?php if($company->jobs()->get()->count() > 0): ?>
+    <div class="row margin-top-lg">
+        <span class="span-job-descripton-note"><b>OUR OPENNING JOBS</b></span>
+    </div>
+
+    <div class="row margin-top-xs" style="background-color: #F2F5F7;">
+
+        <div class="row margin-top-xs">
+            <div class="col-sm-12">
+                <div class="col-sm-5" id="job_main_info">
+                    <span class="table-header-span">Job</span>
+                </div>
+                <div class="col-sm-1 text-center" id="job_other_info">
+                    <?php if(!$company->hide_bids_iframe): ?>
+                    <span class="table-header-span">Bids</span>
+                    <?php endif; ?>
+                </div>
+                <div class="col-sm-3 text-center" id="job_other_info">
+                    <?php if(!$company->hide_bonus_iframe): ?>
+                    <span class="table-header-span">Recruitment Bonus</span>
+                    <?php endif; ?>
+                </div>
+                <div class="col-sm-2 text-center" id="job_other_info">
+                    <?php if(!$company->hide_salary_iframe): ?>
+                    <span class="table-header-span">Salary</span>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+
+        <?php foreach($company->jobs()->get() as $job): ?>
+        <div class="row margin-top-xs" id="div_job">
+            <div class="row table-job-row padding-top-xs">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="col-sm-5 padding-top-xxs" style="padding-left: 0px;" id="job_main_info">
+                            <span><a href="<?php echo URL::route('widget.jobView', array($company->slug, $job->slug)); ?>"><?php echo $job->name; ?></a></span>
+                        </div>
+                        <div class="col-sm-1 text-center padding-top-xxs" id="job_other_info">
+                            <?php if(!$company->hide_bids_iframe): ?>
+                            <span><?php echo count($job->applies); ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col-sm-3 text-center padding-top-xxs" id="job_other_info">
+                            <?php if(!$company->hide_bonus_iframe): ?>
+                            <span>$<?php echo $job->bonus; ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col-sm-2 text-center padding-top-xxs" id="job_other_info">
+                            <?php if(!$company->hide_salary_iframe): ?>
+                            <span>$<?php echo $job->salary; ?></span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="col-sm-1 text-right" style="padding-left: 0px;" id="job_apply_button">
+                            <?php if ($bid_flag[$job->id] == 1) {?>
+                            <div style="padding-top: 4px; height: 28px;">
+                                <span class="span-bid">Applied</span>
+                            </div>
+                            <?php }else {?>
+                            <a class="btn btn-success btn-sm btn-home" href="<?php echo URL::route('widget.job.apply', array($company->slug, $job->slug)); ?>">Apply</a>
+                            <?php }?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row margin-top-xxs">
+                    <div class="col-sm-12">
+                        <div class="col-sm-12" style="padding-left: 0px;">
+                            <button class="btn btn-link btn-sm text-uppercase btn-job-table" other-target="div_more" other-target-second="div_hint" other-target-third="div_apply" data-target="div_overview" onclick="showView(this)"> Overview</button>
+                            <button class="btn btn-link btn-sm text-uppercase btn-job-table" other-target="div_more" other-target-second="div_overview" other-target-third="div_apply" data-target="div_hint" onclick="showView(this)"><i class="fa fa-check"></i> Give us a hint</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Div for Overview -->
+                <div class="row" id="div_overview" style="display: none;">
+                    <div class="col-sm-12">
+                        <div class="col-sm-12" style="padding-left: 0px; padding-right: 0px;">
+                            <div class="alert alert-success alert-dismissibl fade in">
+                                <button type="button" class="close" data-target="div_overview" onclick="hideView(this)">
+                                    <span aria-hidden="true">&times;</span>
+                                    <span class="sr-only">Close</span>
+                                </button>
+                                <p>
+                                    <span class="span-job-description-title">Job description:</span>
+                                </p>
+                                <p>
+                                    <span class="span-job-descripton-note"><?php echo nl2br($job->description); ?></span>
+                                </p>
+                                <p>&nbsp</p>
+                                <p>
+                                    <span class="span-job-description-title">Additional requirements:</span>
+                                </p>
+                                <p>
+                                    <span class="span-job-descripton-note"><?php echo $job->requirements; ?></span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End for Overview -->
+
+                <!-- Div for More -->
+                <div class="row" id="div_more" style="display: none;">
+                    <div class="col-sm-12">
+                        <div class="col-sm-12" style="padding-left: 0px; padding-right: 0px;">
+                            <div class="alert alert-success alert-dismissibl fade in">
+                                <button type="button" class="close" data-target="div_more" onclick="hideView(this)">
+                                    <span aria-hidden="true">&times;</span>
+                                    <span class="sr-only">Close</span>
+                                </button>
+                                <p>
+                                    <span class="span-job-description-title">Similar Jobs:</span>
+                                </p>
+                                <?php foreach($job->category->jobs as $sjob): ?>
+                                <?php if ($sjob->id == $job->id) continue;?>
+                                <p>
+                                    <span class="span-job-descripton-note"><a href="<?php echo URL::route('widget.jobView', array($company->slug, $sjob->slug)); ?>"><?php echo $sjob->name; ?></a></span>
+                                </p>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End for More -->
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php else: ?>
+        <div class="row margin-top-lg text-center">
+            <span class="span-job-descripton-note"><b>There are no opening jobs.</b></span>
+        </div>
+
+        <div class="row margin-top-normal text-center">
+            <a class="btn btn-success btn-sm btn-home" href="<?php echo URL::route('widget.job.apply', $company->slug); ?>">Send Open Application</a>
+        </div>
+    <?php endif; ?>
+
+</div>
+<?php $__env->stopSection(); ?>
+
+<?php $__env->startSection('custom-scripts'); ?>
+	<?php echo HTML::script('/assets/js/star-rating.min.js'); ?>
+
+    <?php echo $__env->make('js.widget.job', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('widget.layout', array_except(get_defined_vars(), array('__data', '__path')))->render(); ?>
